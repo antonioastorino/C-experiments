@@ -1,0 +1,10 @@
+{
+	"files.associations": {
+		"*.c": "c",
+		"*.ams": "hack_asm",
+		"*.asm": "nasm",
+		"*.rs": "rust",
+		"inttypes.h": "c",
+		"string.h": "c"
+	}
+}
