@@ -5,5 +5,6 @@
 #include <sys/types.h>
 
 Result_void fs_utils_mkdir(const char* dir_path, mode_t permission);
+Result_void fs_utils_mkdir_p(const char* dir_path, mode_t permission);
 
 #endif

@@ -1,4 +1,5 @@
 build
-bin
 MakeFile
 prj-out-*
+*.swp
+*.bak

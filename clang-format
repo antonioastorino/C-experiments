@@ -5,7 +5,7 @@
                                                                                                    \
     Result_##suffix Ok_##suffix(type ok_result) {                                                  \
         Result_##suffix res = {                                                                    \
-            .is_err = false,                                                                       \
+            .error_code = false,                                                                       \
             .ok     = ok_result,                                                                   \
             .err    = "",                                                                          \
         };                                                                                         \
@@ -14,7 +14,7 @@
                                                                                                    \
     Result_##suffix Err_##suffix(char* message) {                                                  \
         Result_##suffix res = {                                                                    \
-            .is_err = true,                                                                        \
+            .error_code = true,                                                                        \
             .err    = message,                                                                     \
         };                                                                                         \
         return res;                                                                                \
