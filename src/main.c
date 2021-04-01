@@ -11,7 +11,7 @@
 int main() {
 #if TEST
 #include "../test/common.c"
-#include "../test/fs_utils_test.c"
+#include "../test/test_fs_utils.c"
 #include "../test/test_class_string.c"
 #else
     printf("Hello from `main`\n");
