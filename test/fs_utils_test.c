@@ -1,4 +1,3 @@
-#include "common.c"
 #include "fs_utils.h"
 
 PRINT_BANNER("Testing fs_utils");

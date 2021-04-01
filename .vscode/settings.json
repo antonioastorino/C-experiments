@@ -5,6 +5,7 @@
 		"*.asm": "nasm",
 		"*.rs": "rust",
 		"inttypes.h": "c",
-		"string.h": "c"
+		"string.h": "c",
+		"random": "c"
 	}
 }

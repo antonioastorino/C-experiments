@@ -6,12 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define TEST 0
+#define TEST 1
 
 int main() {
 #if TEST
+#include "../test/common.c"
 #include "../test/fs_utils_test.c"
-#include "../test/string_utils_test.c"
+#include "../test/test_class_string.c"
 #else
     printf("Hello from `main`\n");
     printf("Run 'bin/build-run.sh test' to run the unit tests\n");
