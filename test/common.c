@@ -2,7 +2,7 @@
   if (value_1 == value_2) {                                                    \
     printf("> Ok\t %s\n", message);                                            \
   } else {                                                                     \
-    printf("> Err\t %s:%d\n", __FILE__, __LINE__);                             \
+    printf("> Err\t Test failed.\n%s:%d\n", __FILE__, __LINE__);               \
   }
 
 #define PRINT_BANNER(title)                                                    \

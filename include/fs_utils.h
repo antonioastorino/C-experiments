@@ -7,4 +7,5 @@
 Result_void fs_utils_mkdir(const char *, mode_t);
 Result_void fs_utils_mkdir_p(const char *, mode_t);
 Result_void fs_utils_rmdir(const char *);
+Result_void fs_utils_rm_r(const char *);
 #endif

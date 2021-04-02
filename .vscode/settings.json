@@ -6,6 +6,7 @@
 		"*.rs": "rust",
 		"inttypes.h": "c",
 		"string.h": "c",
-		"random": "c"
+		"random": "c",
+		"__config": "cpp"
 	}
 }
