@@ -6,26 +6,35 @@ const char* folder_2 = "test/artifacts/test_folder_2/new_inner_folder";
 
 PRINT_BANNER("Testing fs_utils");
 Result_void res_void;
-struct stat st = {0};
 
-// res_void = fs_utils_mkdir(folder_0, 0666);
-// ASSERT_EQ(stat(folder_0, &st), 0, "`fs_utils_mkdir` works fine");
+res_void = fs_utils_mkdir(folder_0, 0666);
+ASSERT_EQ(res_void.error_code, 0, "`fs_utils_mkdir` works fine");
 
-// res_void = fs_utils_mkdir_p(folder_1, 0777);
-// ASSERT_EQ(stat(folder_1, &st), 0,
-//           "`fs_utils_mkdir_p` works fine when the path ends with '/'");
+res_void = fs_utils_mkdir(folder_0, 0666);
+ASSERT_EQ(res_void.error_code, 2, "`fs_utils_mkdir` should fail if the folder exists.");
 
-// res_void = fs_utils_mkdir_p(folder_2, 0777);
-// ASSERT_EQ(stat(folder_2, &st), 0,
-//           "`fs_utils_mkdir_p` works fine when the path does not end with '/'");
+res_void = fs_utils_mkdir_p(folder_1, 0777);
+ASSERT_EQ(res_void.error_code, 0, "`fs_utils_mkdir_p` works fine when the path ends with '/'.");
 
-// res_void = fs_utils_rmdir(folder_2);
-// ASSERT_EQ(stat(folder_2, &st), -1,
-//           "`fs_utils_rmdir` works fine when the folder is empty");
+res_void = fs_utils_mkdir_p(folder_2, 0777);
+ASSERT_EQ(res_void.error_code, 0,
+          "`fs_utils_mkdir_p` works fine when the path does not end with '/'.");
 
-res_void = fs_utils_rm_r("test/artifacts/test_folder_3");
-if (res_void.error_code) {
-    printf("Error: %s\n", res_void.err);
-} else {
-    ASSERT_EQ(stat(folder_1, &st), -1, "`fs_utils_rm_r` works fine when the folder is not empty");
-}
+res_void = fs_utils_rmdir("test/artifacts/empty-0");
+ASSERT_EQ(res_void.error_code, 0, "`fs_utils_rmdir` works fine when the folder is empty.");
+
+res_void = fs_utils_rmdir("test/artifacts/non-empty-0");
+printf("%s, errno: %d\n", res_void.err, res_void.error_code);
+ASSERT_EQ(res_void.error_code, 66, "`fs_utils_rmdir` should fail if the folder is not empty.");
+
+res_void = fs_utils_rm_r("test/artifacts/empty");
+ASSERT_EQ(res_void.error_code, 0, "`fs_utils_rm_r` works fine when the folder is empty.");
+
+res_void = fs_utils_rm_r("test/artifacts/non-empty");
+ASSERT_EQ(res_void.error_code, 0, "`fs_utils_rm_r` works fine when the folder is NOT empty.");
+
+res_void = fs_utils_rm_r("test/artifacts/missing");
+ASSERT_EQ(res_void.error_code, 2, "`fs_utils_rm_r` should fail if the folder is missing.");
+
+res_void = fs_utils_rm_r("test/artifacts/deleteme.txt");
+ASSERT_EQ(res_void.error_code, 0, "`fs_utils_rm_r` should NOT fail on a file.");
