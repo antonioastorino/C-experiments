@@ -1,6 +1,7 @@
 //  Created by Antonio Astorino on 27/03/2021.
 
 #include "fs_utils.h"
+#include "logger.h"
 #include "result.h"
 #include <errno.h>
 #include <stdio.h>
@@ -12,11 +13,12 @@ int main(int argc, char** argv) {
     if (argc != 1) { fprintf(stderr, "Parameters not supported"); }
     printf("Hello from `main`\n");
     printf("You are running this program from `%s`.\n", argv[0]);
-
+    printf("Log level: %d\n", LOG_LEVEL);
 #if TEST
 #include "../test/common.c"
-//#include "../test/test_class_string.c"
+#include "../test/test_class_string.c"
 #include "../test/test_fs_utils.c"
+#include "../test/test_logger.c"
 #else
     printf("Hello from `main`\n");
     printf("You are running this program from `%s`.\n", argv[0]);

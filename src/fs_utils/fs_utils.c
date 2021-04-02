@@ -1,4 +1,5 @@
 #include "fs_utils.h"
+#include "logger.h"
 #include <errno.h>
 #include <fts.h>
 #include <stdio.h>
@@ -43,8 +44,11 @@ Result_void fs_utils_mkdir(const char* dir_path_p, mode_t permission) {
 Result_void fs_utils_mkdir_p(const char* dir_path_p, mode_t permission) {
     Result_void result;
     size_t path_length = strlen(dir_path_p);
-    printf("Trying to create `%s`", dir_path_p);
-    if (fs_utils_does_exist(dir_path_p)) { return Ok(NULL); }
+    printf("Trying to create `%s`\n", dir_path_p);
+    if (fs_utils_does_exist(dir_path_p)) {
+        printf("The folder already exists\n");
+        return Ok(NULL);
+    }
     char partial_path[path_length + 1];
     size_t start_index = 0;
     if (dir_path_p[0] == '/') {
@@ -55,8 +59,12 @@ Result_void fs_utils_mkdir_p(const char* dir_path_p, mode_t permission) {
         if (dir_path_p[i] == '/') {
             // Terminate the partial string here.
             partial_path[i] = 0;
-            result          = fs_utils_mkdir((const char*)partial_path, permission);
-            RET_ON_ERR(result)
+            printf("Trying to create `%s`\n", partial_path);
+            // Check if this path exists or try to create it.
+            if (!fs_utils_does_exist((const char*)partial_path)) {
+                result = fs_utils_mkdir((const char*)partial_path, permission);
+                RET_ON_ERR(result)
+            }
         }
         // Append path chars to partial_path
         partial_path[i] = dir_path_p[i];

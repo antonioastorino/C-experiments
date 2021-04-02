@@ -8,7 +8,7 @@ PRINT_BANNER("Testing fs_utils");
 Result_void res_void;
 
 res_void = fs_utils_mkdir(folder_0, 0666);
-ASSERT_EQ(res_void.error_code, 0, "`fs_utils_mkdir` works fine");
+ASSERT_EQ(res_void.error_code, 0, "`fs_utils_mkdir` works fine.");
 
 res_void = fs_utils_mkdir(folder_0, 0666);
 ASSERT_EQ(res_void.error_code, 2, "`fs_utils_mkdir` should fail if the folder exists.");
