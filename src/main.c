@@ -22,8 +22,8 @@ int main(int argc, char** argv) {
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
 #if TEST
-    test_class_string();
-    test_fs_utils();
+    // test_class_string();
+    // test_fs_utils();
     test_logger();
 #else
     printf("Hello from `main`\n");

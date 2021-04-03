@@ -70,7 +70,7 @@ done
 pf "\nCPPFLAGS=-c -Wextra -std=c++14 -O\$(OPT) -g"
 pf "\nCFLAGS=-c -Wextra -O\$(OPT) -g"
 pf "\nCPPC=g++"
-pf "\nCC=gcc"
+pf "\nCC=clang"
 pf "\nBD=$BD"
 [ "$LDLIBS" != "" ] && pf "\nLDLIBS=$LDLIBS" # LDLIBS added if not empty
 pf "\nINC="

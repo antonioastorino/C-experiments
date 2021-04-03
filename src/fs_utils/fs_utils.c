@@ -4,7 +4,6 @@
 #include <fts.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -26,7 +25,7 @@ Result_void fs_utils_mkdir(const char* dir_path_p, mode_t permission) {
     // Save the current mode mask and reset the mask.
     mode_t old_mask = umask(0);
     if (!fs_utils_does_exist(dir_path_p)) {
-        printf("Trying to create %s\n", dir_path_p);
+        LOG(TRACE, "Trying to create %s", dir_path_p);
         if (mkdir(dir_path_p, permission) == -1) {
             result = Err(NULL, "Failed to create folder.", errno);
         } else {
