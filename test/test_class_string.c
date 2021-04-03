@@ -1,22 +1,24 @@
 #include "class_string.h"
+#include <unistd.h>
 PRINT_BANNER("String class")
 
-const char* str = "Hello";
-String s        = String_new(str);
-ASSERT_EQ(s.length, strlen(str), "Length correct.");
-ASSERT_EQ(s.size, strlen(str) * 2, "Size correct.");
-int res = String_println(&s);
-ASSERT_EQ(res, 0, "Printing functions work.")
+const char* str = "Hello everybody";
+String s1       = String_new(str);
 
-    // String s1 = String_new("Then number is %d", 5);
-    // String_println(&s1);
-    // String_println(&s1);
-    // String_println(&s1);
+ASSERT_EQ(s1.length, strlen(str), "Length correct.");
+ASSERT_EQ(s1.size, strlen(str) * 2, "Size correct.");
 
-    // String_renew(&s, "HelloHello");
-    // ASSERT_EQ(s.len, 2 * strlen(str), "Length correct");
+ASSERT_EQ(String_println(&s1), 0, "Printing functions work.")
+String_display(&s1);
+ASSERT_EQ(String_println(&s1), 0, "Display functions work.")
 
-    // String_display((const String*)&s);
-    // String_print((const String*)&s);
+const char* format1 = "The number is %d";
+String s2           = String_new(format1, 400);
+ASSERT_EQ(s2.length, strlen(str), "Length correct.");
+ASSERT_EQ(s2.size, strlen(str) * 2, "Size correct.");
 
-    String_destroy(&s);
+ASSERT_EQ(String_println(&s2), 0, "Printing functions work.")
+String_display(&s2);
+ASSERT_EQ(String_println(&s2), 0, "Display functions work.")
+String_destroy(&s1);
+String_destroy(&s2);
