@@ -1,21 +1,33 @@
 #include "class_string.h"
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-String String_new(const char* string) {
-    size_t len = strlen(string);
+String String_new(const char* format, ...) {
+    va_list args;
+    char** dest;
+    va_start(args, format);
+    // Calculate how many bytes are needed (excluding the terminating '\0').
+    if (vasprintf(dest, format, args) == -1) { exit(1); }
+    size_t actual_size = strlen(*dest);
+    printf("Calculated size: %d\n", actual_size);
     // Allocate twice the required length
-    char* dest = (char*)malloc(sizeof(char) * len * 2);
-    // Copy and fill in with zeros.
-    (void)strncpy(dest, string, len * 2);
-    String string_obj = {.str = dest, .len = len * 2};
+    size_t allocated_size = actual_size * 2;
+    printf("Allocated size: %d\n", allocated_size);
+    *dest = (char**)realloc(*dest, sizeof(char) * allocated_size);
+    printf("Created string: %s\n", *dest);
+    va_end(args);
+    // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
+    String string_obj = {.str = *dest, .length = actual_size, .size = allocated_size};
+
+    printf("Saved string: %s\n", (string_obj.str));
     return string_obj;
 }
 
 void String_renew(String* string_obj_p, const char* new_str) {
     size_t new_len = strlen(new_str);
-    if (new_len >= string_obj_p->len) {
+    if (new_len >= string_obj_p->length) {
         string_obj_p->str = (char*)reallocf(string_obj_p->str, new_len * 2);
     }
     strncpy(string_obj_p->str, new_str, new_len * 2);
@@ -24,27 +36,28 @@ void String_renew(String* string_obj_p, const char* new_str) {
 void String_destroy(String* string_obj_p) {
     free(string_obj_p->str);
     string_obj_p->str = NULL;
-    string_obj_p = NULL;
+    string_obj_p      = NULL;
 }
 
-Result_void String_print(const String* string_obj_p) {
-    STRING_SANITY_BEGIN(string_obj_p)
-    for (size_t i = 0; i < string_obj_p->len; i++) { printf("%c", string_obj_p->str[i]); }
-    STRING_SANITY_END
+int String_print(const String* string_obj_p) {
+    if (string_obj_p == NULL) { return -1; }
+    for (size_t i = 0; i < string_obj_p->length; i++) { printf("%c", string_obj_p->str[i]); }
+    return 0;
 }
 
-Result_void String_println(const String* string_obj_p) {
-    Result_void result = String_print(string_obj_p);
-    if (result.error_code != 0) { printf("\n"); }
-    return result;
+int String_println(const String* string_obj_p) {
+    if (String_print(string_obj_p) == -1 ) return -1;
+    printf("\n");
+    return 0;
 }
 
-
-Result_void String_display(const String* string_obj_p) {
-    STRING_SANITY_BEGIN(string_obj_p)
+int String_display(const String* string_obj_p) {
+    if (string_obj_p == NULL) {
+        return -1;
+    }
     printf("String: `");
     size_t null_counter = 0;
-    for (size_t i = 0; i < string_obj_p->len; i++) {
+    for (size_t i = 0; i < string_obj_p->length; i++) {
         if (string_obj_p->str[i] == '\0') {
             null_counter++;
             printf("<null>");
@@ -54,9 +67,9 @@ Result_void String_display(const String* string_obj_p) {
     }
     printf("`\n");
     printf("Null chars: `%lu`\n", null_counter);
-    printf("Allocated len: `%lu`\n", string_obj_p->len);
+    printf("Allocated length: `%lu`\n", string_obj_p->length);
     printf("Displayed version: `");
     String_print(string_obj_p);
     printf("`\n");
-    STRING_SANITY_END
+    return 0;
 }

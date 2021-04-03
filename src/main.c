@@ -17,8 +17,8 @@ int main(int argc, char** argv) {
 #if TEST
 #include "../test/common.c"
 #include "../test/test_class_string.c"
-#include "../test/test_fs_utils.c"
-#include "../test/test_logger.c"
+//#include "../test/test_fs_utils.c"
+//#include "../test/test_logger.c"
 #else
     printf("Hello from `main`\n");
     printf("You are running this program from `%s`.\n", argv[0]);
