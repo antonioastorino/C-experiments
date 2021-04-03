@@ -3,7 +3,10 @@
 #include "result.h"
 #include <sys/types.h>
 
-typedef struct {
+/**
+ * This is a basic 'class' that should NEVER use the logger. The logger itself uses it.
+ */
+typedef struct class_string {
     // Array of chars whose allocated length >= `len`.
     char* str;
     // Length that would be returned by `strlen(str)`.

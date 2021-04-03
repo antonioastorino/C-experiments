@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-
 
 String String_new(const char* format, ...) {
     va_list args;
@@ -16,7 +14,6 @@ String String_new(const char* format, ...) {
         exit(1);
     }
     size_t actual_size = strlen(dest);
-    // printf("Calculated size: %zu\n", actual_size);
     // Allocate twice the required length
     size_t allocated_size = actual_size * 2;
     // printf("Allocated size: %zu\n", allocated_size);
@@ -26,18 +23,18 @@ String String_new(const char* format, ...) {
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
     String string_obj = {.str = dest, .length = actual_size, .size = allocated_size};
 
-    // printf("Saved string: %s\n", string_obj.str);
-    // printf("Saved string size: %lu\n", string_obj.size);
-
     return string_obj;
 }
 
 void String_renew(String* string_obj_p, const char* new_str) {
     size_t new_len = strlen(new_str);
-    if (new_len >= string_obj_p->length) {
-        string_obj_p->str = (char*)reallocf(string_obj_p->str, new_len * 2);
+    if (new_len >= string_obj_p->size) {
+        string_obj_p->str  = (char*)reallocf(string_obj_p->str, sizeof(char) * new_len * 2);
+        string_obj_p->size = new_len * 2;
     }
-    strncpy(string_obj_p->str, new_str, new_len * 2);
+    // Copy an extra byte for the NULL characther.
+    strncpy(string_obj_p->str, new_str, new_len + 1);
+    string_obj_p->length = new_len;
 }
 
 void String_destroy(String* string_obj_p) {
@@ -58,21 +55,16 @@ int String_println(const String* string_obj_p) {
 }
 
 int String_display(const String* string_obj_p) {
-    if (string_obj_p == NULL) {
-        return -1;
-    }
+    if (string_obj_p == NULL) { return -1; }
     printf("String: `");
-    size_t null_counter = 0;
     for (size_t i = 0; i < string_obj_p->size; i++) {
         if (string_obj_p->str[i] == '\0') {
-            null_counter++;
             printf("<null>");
         } else {
             printf("%c", string_obj_p->str[i]);
         }
     }
     printf("`\n");
-    printf("Null chars: `%lu`\n", null_counter);
     printf("Allocated length: `%lu`\n", string_obj_p->length);
     printf("Displayed version: `");
     String_print(string_obj_p);

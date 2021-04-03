@@ -9,16 +9,22 @@
 #include <string.h>
 #define TEST 1
 
+#if TEST
+#include "../test/common.c"
+#include "../test/test_class_string.c"
+#include "../test/test_fs_utils.c"
+#include "../test/test_logger.c"
+#endif
+
 int main(int argc, char** argv) {
     if (argc != 1) { fprintf(stderr, "Parameters not supported"); }
     printf("Hello from `main`\n");
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
 #if TEST
-#include "../test/common.c"
-#include "../test/test_class_string.c"
-//#include "../test/test_fs_utils.c"
-//#include "../test/test_logger.c"
+test_class_string();
+test_fs_utils();
+test_logger();
 #else
     printf("Hello from `main`\n");
     printf("You are running this program from `%s`.\n", argv[0]);
