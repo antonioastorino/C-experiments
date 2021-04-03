@@ -13,8 +13,7 @@ void test_class_string() {
     ASSERT_EQ(s1.size, strlen(str) * 2, "Size correct.");
 
     ASSERT_EQ(String_println(&s1), 0, "Printing functions work.")
-    String_display(&s1);
-    ASSERT_EQ(String_println(&s1), 0, "Display functions work.")
+    ASSERT_EQ(String_display(&s1), 0, "Display functions work.")
 
     PRINT_TEST_TITLE("New from formatter");
     const char* format1 = "The number is";
@@ -25,8 +24,7 @@ void test_class_string() {
     ASSERT_EQ(s2.size, initial_size, "Size correct.");
 
     ASSERT_EQ(String_println(&s2), 0, "Printing functions work.")
-    String_display(&s2);
-    ASSERT_EQ(String_println(&s2), 0, "Display functions work.")
+    ASSERT_EQ(String_display(&s2), 0, "Display functions work.")
 
     PRINT_TEST_TITLE("Renew without resizing");
     String_renew(&s2, "The new string content.");
@@ -34,8 +32,7 @@ void test_class_string() {
     ASSERT_EQ(s2.size, initial_size, "Size correct.");
 
     ASSERT_EQ(String_println(&s2), 0, "Printing functions work.")
-    String_display(&s2);
-    ASSERT_EQ(String_println(&s2), 0, "Display functions work.")
+    ASSERT_EQ(String_display(&s2), 0, "Display functions work.")
 
     PRINT_TEST_TITLE("Renew with resizing");
     String_renew(&s2, "The new string content is way too long.");
@@ -43,8 +40,7 @@ void test_class_string() {
     ASSERT_EQ(s2.size, s2.length * 2, "Size correct.");
 
     ASSERT_EQ(String_println(&s2), 0, "Printing functions work.")
-    String_display(&s2);
-    ASSERT_EQ(String_println(&s2), 0, "Display functions work.")
+    ASSERT_EQ(String_display(&s2), 0, "Display functions work.")
 
     String_destroy(&s1);
     String_destroy(&s2);

@@ -5,7 +5,7 @@ void test_fs_utils() {
     const char* folder_0 = "test/artifacts/test_folder_0";
     const char* folder_1 = "test/artifacts/test_folder_1/new_inner_folder/";
     const char* folder_2 = "test/artifacts/test_folder_2/new_inner_folder";
-size_t counter = 0;
+    size_t counter       = 0;
     PRINT_BANNER("Testing fs_utils");
     Result_void res_void;
 

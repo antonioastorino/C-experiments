@@ -19,5 +19,5 @@ else
     sed -i.bak 's/^#define TEST 1/#define TEST 0/' src/main.c
 fi
 /bin/rm -f *.bak
-make && clear && ./prj-out-0
+clear; make && ./prj-out-0
 popd >/dev/null

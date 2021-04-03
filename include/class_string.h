@@ -17,7 +17,7 @@ typedef struct class_string {
 
 String String_new(const char*, ...);
 // Replace the internal string and reallocate its memory if necessary.
-void String_renew(String *, const char*);
+void String_renew(String*, const char*, ...);
 void String_destroy(String*);
 int String_print(const String*);
 int String_println(const String*);
