@@ -42,6 +42,11 @@ void test_class_string() {
     ASSERT_EQ(String_println(&s2), 0, "Printing functions work.")
     ASSERT_EQ(String_display(&s2), 0, "Display functions work.")
 
+    PRINT_TEST_TITLE("starts_with() function");
+    ASSERT_EQ(String_starts_with(&s2, "The new"), true, "starts_with() works when true");
+    ASSERT_EQ(String_starts_with(&s2, "new"), false, "starts_with() works when not beginning");
+    ASSERT_EQ(String_starts_with(&s2, ""), true, "starts_with() second is empty");
+
     String_destroy(&s1);
     String_destroy(&s2);
 }

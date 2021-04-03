@@ -20,4 +20,6 @@ int String_print(const String*);
 int String_println(const String*);
 int String_display(const String*);
 
+bool String_starts_with(String*, const char*);
+
 #endif

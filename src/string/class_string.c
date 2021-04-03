@@ -1,4 +1,6 @@
 #include "class_string.h"
+#include "logger.h"
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +12,7 @@ String String_new(const char* format, ...) {
     va_start(args, format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
     if (vasprintf(&tmp_str_p, format, args) == -1) {
-        printf("Something went wrong.");
+        LOG(ERROR, "Something went wrong with vasprintf - errno: %d", errno)
         exit(1);
     }
     size_t actual_size = strlen(tmp_str_p);
@@ -18,7 +20,7 @@ String String_new(const char* format, ...) {
     size_t allocated_size = actual_size * 2;
     // printf("Allocated size: %zu\n", allocated_size);
     tmp_str_p = (char*)reallocf(tmp_str_p, sizeof(char) * allocated_size);
-    // printf("Created string: %s\n", tmp_str_p);
+    LOG(TRACE, "Created string: %s\n", tmp_str_p)
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
     String string_obj = {.str = tmp_str_p, .length = actual_size, .size = allocated_size};
@@ -79,4 +81,12 @@ int String_display(const String* string_obj_p) {
     String_print(string_obj_p);
     printf("`\n");
     return 0;
+}
+
+bool String_starts_with(String *p_string, const char *prefix) {
+    if (strstr(p_string->str, prefix) == p_string->str) {
+        return true;
+    } else {
+        return false;
+    }
 }
