@@ -6,11 +6,11 @@
 #include <sys/types.h>
 
 // Folders only.
-Result_void fs_utils_mkdir(String*, mode_t);
-Result_void fs_utils_mkdir_p(String*, mode_t);
-Result_void fs_utils_rmdir(String*);
+Result fs_utils_mkdir(String*, mode_t);
+Result fs_utils_mkdir_p(String*, mode_t);
+Result fs_utils_rmdir(String*);
 // Files only.
-Result_void fs_utils_rm(String*);
+Result fs_utils_rm(String*);
 // Files and folders.
-Result_void fs_utils_rm_r(String*);
+Result fs_utils_rm_r(String*);
 #endif

@@ -14,13 +14,13 @@ typedef struct class_string
     size_t size;
 } String;
 
-Result_void String_new(String*, const char*, ...);
+Result String_new(const char*, ...);
 // Replace the internal string and reallocate its memory if necessary.
-Result_void String_renew(String*, const char*, ...);
+Result String_renew(String*, const char*, ...);
 void String_destroy(String*);
-Result_void String_print(const String*);
-Result_void String_println(const String*);
-Result_void String_display(const String*);
+Result String_print(const String*);
+Result String_println(const String*);
+Result String_display(const String*);
 
 bool String_starts_with(String*, const char*);
 

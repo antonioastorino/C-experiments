@@ -28,6 +28,12 @@ fi
 echo -e "\n\n --- Building and running ${MODE} --- \n\n"
 make && ./prj-out-0 2>"${LOG_FILE}"
 
+RET_VAL=$?
+if [ ${RET_VAL} -ne 0 ]; then
+    echo -e "\n\n\e[31mFAIL\e[0m - Execution interrupted with error code ${RET_VAL}.\n\n"
+    exit ${RET_VAL}
+fi
+
 if [ -f "${LOG_FILE}" ]; then
     if [ "$(cat ${LOG_FILE})" = "" ]; then
         echo -e "\n\n\e[32mSUCCESS:\e[0m - All tests passed.\n\n"

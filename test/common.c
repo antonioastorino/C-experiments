@@ -5,8 +5,7 @@
     }                                                                                              \
     else                                                                                           \
     {                                                                                              \
-        fprintf(stderr, "\n> \e[31mErr - Test failed.\e[0m\n%s:%d\n", __FILE__, __LINE__);                  \
-        return;                                                                                    \
+        fprintf(stderr, "\n> \e[31mErr - Test failed.\e[0m\n%s:%d\n", __FILE__, __LINE__);         \
     }
 
 #define PRINT_BANNER(title)                                                                        \

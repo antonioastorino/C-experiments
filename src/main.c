@@ -30,8 +30,6 @@ int main(int argc, char** argv)
     test_fs_utils();
     test_logger();
 #else
-    printf("Hello from `main`\n");
-    printf("You are running this program from `%s`.\n", argv[0]);
     printf("Run 'bin/build-run.sh test' to run the unit tests\n");
     // insert code here...
     FILE* file_1 = fopen("/Volumes/DataMBP/deleteme/file1.txt", "w+");
