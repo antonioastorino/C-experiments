@@ -1,7 +1,8 @@
 #include "class_string.h"
 #include <unistd.h>
 
-void test_class_string() {
+void test_class_string()
+{
     size_t counter = 0;
     PRINT_BANNER("String class")
 

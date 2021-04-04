@@ -5,10 +5,11 @@ PointerAlignment: Left
 AlignConsecutiveAssignments: true
 BinPackParameters: true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortIfStatementsOnASingleLine: true
-AllowShortBlocksOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
 ColumnLimit: 100
 AccessModifierOffset: -4
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 BreakBeforeBinaryOperators: All
+BreakBeforeBraces: Allman

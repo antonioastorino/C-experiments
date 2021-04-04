@@ -1,7 +1,8 @@
 #include "fs_utils.h"
 #include <sys/stat.h>
 
-void test_fs_utils() {
+void test_fs_utils()
+{
     String folder_0 = String_new("test/artifacts/test_folder_0");
     String folder_1 = String_new("test/artifacts/test_folder_1/new_inner_folder/");
     String folder_2 = String_new("test/artifacts/test_folder_2/new_inner_folder");
@@ -49,10 +50,9 @@ void test_fs_utils() {
     path_string = String_new("test/artifacts/deleteme.txt");
     res_void    = fs_utils_rm_r(&path_string);
     ASSERT_EQ(res_void.error_code, 0, "`fs_utils_rm_r` should NOT fail on a file.");
-    
 
-   String_destroy(&folder_0);
-   String_destroy(&folder_1);
-   String_destroy(&folder_2);
-   String_destroy(&path_string);
+    String_destroy(&folder_0);
+    String_destroy(&folder_1);
+    String_destroy(&folder_2);
+    String_destroy(&path_string);
 }

@@ -9,10 +9,12 @@
 //     return;
 // }
 
-void get_datetime(char out_date[], size_t buf_len) {
+void get_datetime(char out_date[], size_t buf_len)
+{
     time_t now     = time(&now);
     struct tm* ptm = gmtime(&now);
-    if ((ptm == NULL) || (now == -1)) {
+    if ((ptm == NULL) || (now == -1))
+    {
         // Set to empty string.
         out_date[0] = 0;
         return;

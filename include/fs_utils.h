@@ -1,8 +1,8 @@
 #ifndef FS_UTILS_H
 #define FS_UTILS_H
 
-#include "result.h"
 #include "class_string.h"
+#include "result.h"
 #include <sys/types.h>
 
 // Folders only.

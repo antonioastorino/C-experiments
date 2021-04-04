@@ -3,7 +3,8 @@
 // Macro definition to create customized result types.
 #define RESULT_TYPE_c(suffix, type)                                                                \
                                                                                                    \
-    Result_##suffix Ok_##suffix(type ok_result) {                                                  \
+    Result_##suffix Ok_##suffix(type ok_result)                                                    \
+    {                                                                                              \
         Result_##suffix res = {                                                                    \
             .error_code = 0,                                                                       \
             .ok         = ok_result,                                                               \
@@ -12,7 +13,8 @@
         return res;                                                                                \
     }                                                                                              \
                                                                                                    \
-    Result_##suffix Err_##suffix(const char* message, int error_code) {                            \
+    Result_##suffix Err_##suffix(const char* message, int error_code)                              \
+    {                                                                                              \
         Result_##suffix res = {                                                                    \
             .error_code = error_code,                                                              \
             .err        = message,                                                                 \

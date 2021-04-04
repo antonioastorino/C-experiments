@@ -6,12 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-String String_new(const char* format, ...) {
+String String_new(const char* format, ...)
+{
     va_list args;
     char* tmp_str_p;
     va_start(args, format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
-    if (vasprintf(&tmp_str_p, format, args) == -1) {
+    if (vasprintf(&tmp_str_p, format, args) == -1)
+    {
         LOG(ERROR, "Something went wrong with vasprintf - errno: %d", errno)
         exit(1);
     }
@@ -28,17 +30,20 @@ String String_new(const char* format, ...) {
     return string_obj;
 }
 
-void String_renew(String* string_obj_p, const char* new_format, ...) {
+void String_renew(String* string_obj_p, const char* new_format, ...)
+{
     va_list args;
     char* tmp_str_p;
     va_start(args, new_format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
-    if (vasprintf(&tmp_str_p, new_format, args) == -1) {
+    if (vasprintf(&tmp_str_p, new_format, args) == -1)
+    {
         printf("Something went wrong.");
         exit(1);
     }
     size_t new_len = strlen(tmp_str_p);
-    if (new_len >= string_obj_p->size) {
+    if (new_len >= string_obj_p->size)
+    {
         string_obj_p->str  = (char*)reallocf(string_obj_p->str, sizeof(char) * new_len * 2);
         string_obj_p->size = new_len * 2;
     }
@@ -48,30 +53,48 @@ void String_renew(String* string_obj_p, const char* new_format, ...) {
     string_obj_p->length = new_len;
 }
 
-void String_destroy(String* string_obj_p) {
+void String_destroy(String* string_obj_p)
+{
     free(string_obj_p->str);
     string_obj_p->str = NULL;
 }
 
-int String_print(const String* string_obj_p) {
-    if (string_obj_p == NULL) { return -1; }
-    for (size_t i = 0; i < string_obj_p->length; i++) { printf("%c", string_obj_p->str[i]); }
+int String_print(const String* string_obj_p)
+{
+    if (string_obj_p == NULL)
+    {
+        return -1;
+    }
+    for (size_t i = 0; i < string_obj_p->length; i++)
+    {
+        printf("%c", string_obj_p->str[i]);
+    }
     return 0;
 }
 
-int String_println(const String* string_obj_p) {
-    if (String_print(string_obj_p) == -1) return -1;
+int String_println(const String* string_obj_p)
+{
+    if (String_print(string_obj_p) == -1)
+        return -1;
     printf("\n");
     return 0;
 }
 
-int String_display(const String* string_obj_p) {
-    if (string_obj_p == NULL) { return -1; }
+int String_display(const String* string_obj_p)
+{
+    if (string_obj_p == NULL)
+    {
+        return -1;
+    }
     printf("String: `");
-    for (size_t i = 0; i < string_obj_p->size; i++) {
-        if (string_obj_p->str[i] == '\0') {
+    for (size_t i = 0; i < string_obj_p->size; i++)
+    {
+        if (string_obj_p->str[i] == '\0')
+        {
             printf("<null>");
-        } else {
+        }
+        else
+        {
             printf("%c", string_obj_p->str[i]);
         }
     }
@@ -83,10 +106,14 @@ int String_display(const String* string_obj_p) {
     return 0;
 }
 
-bool String_starts_with(String *p_string, const char *prefix) {
-    if (strstr(p_string->str, prefix) == p_string->str) {
+bool String_starts_with(String* p_string, const char* prefix)
+{
+    if (strstr(p_string->str, prefix) == p_string->str)
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }

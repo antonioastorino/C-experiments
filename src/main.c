@@ -16,8 +16,12 @@
 #include "../test/test_logger.c"
 #endif
 
-int main(int argc, char** argv) {
-    if (argc != 1) { fprintf(stderr, "Parameters not supported"); }
+int main(int argc, char** argv)
+{
+    if (argc != 1)
+    {
+        fprintf(stderr, "Parameters not supported");
+    }
     printf("Hello from `main`\n");
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
@@ -31,7 +35,10 @@ int main(int argc, char** argv) {
     printf("Run 'bin/build-run.sh test' to run the unit tests\n");
     // insert code here...
     FILE* file_1 = fopen("/Volumes/DataMBP/deleteme/file1.txt", "w+");
-    if (file_1 == NULL) { fprintf(stderr, "Failed to open file: errno %d\n", errno); }
+    if (file_1 == NULL)
+    {
+        fprintf(stderr, "Failed to open file: errno %d\n", errno);
+    }
 
 #endif
     return 0;
