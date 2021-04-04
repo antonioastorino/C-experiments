@@ -27,7 +27,8 @@
 		"unordered_map": "c",
 		"utility": "c",
 		"vector": "c",
-		"ranges": "c"
+		"ranges": "c",
+		"class_string.h": "c"
 	},
 	"cSpell.words": [
 		"println"

@@ -77,12 +77,16 @@ Result_void fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
             partial_path[i] = 0;
             LOG(TRACE, "Trying to create `%s`.", partial_path);
             // Check if this path exists or try to create it.
-            String string_partial_path = String_new(partial_path);
+            String string_partial_path;
+            result = String_new(&string_partial_path, partial_path);
+            RET_ON_ERR(result)
+
             if (!fs_utils_does_exist(&string_partial_path))
             {
                 result = fs_utils_mkdir(&string_partial_path, permission);
                 RET_ON_ERR(result)
             }
+            String_destroy(&string_partial_path);
         }
         // Append path chars to partial_path
         partial_path[i] = p_string_dir_path->str[i];
@@ -102,10 +106,14 @@ Result_void fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
 
 Result_void fs_utils_rmdir(String* p_string_dir_path)
 {
+    Result_void result;
     LOG(INFO, "Trying to remove `%s` folder.", p_string_dir_path->str);
     if (rmdir(p_string_dir_path->str))
     {
-        String error_message = String_new("Failed to delete `%s`.", p_string_dir_path);
+        String error_message;
+        result = String_new(&error_message, "Failed to delete `%s`.", p_string_dir_path->str);
+        RET_ON_ERR(result);
+        String_destroy(&error_message);
         return Err(NULL, error_message.str, errno);
     }
 
@@ -144,6 +152,7 @@ Result_void fs_utils_rm(String* p_string_file_path)
         result = fs_utils_rmdir(p_string_file_path);
     }
     fts_close(fts_p);
+    String_destroy(p_string_file_path);
     RET_ON_ERR(result)
     LOG(TRACE, "`%s` successfully deleted.", p_string_file_path->str);
     return Ok(NULL);
@@ -168,14 +177,16 @@ Result_void recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
         {
             LOG(TRACE, "Found child: %s.", link->fts_name);
             // TODO: String_join()
-            String child_path_string = String_new("%s/%s", p_string_dir_path->str, link->fts_name);
+            String child_path_string;
+            result = String_new(&child_path_string, "%s/%s", p_string_dir_path->str, link->fts_name);
+            RET_ON_ERR(result)
+
             LOG(TRACE, "Trying: %s.", child_path_string.str);
             // Do your recursion thing.
             result = recursive_rm_r(fts_p, &child_path_string);
-            if (result.error_code)
-            {
-                return result;
-            }
+            String_destroy(&child_path_string);
+            RET_ON_ERR(result)
+            // Go to the next entry.
             link = link->fts_link;
         }
     }
