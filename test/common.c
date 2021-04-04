@@ -5,7 +5,7 @@
     }                                                                                              \
     else                                                                                           \
     {                                                                                              \
-        printf("\n> \e[31mErr - Test failed.\e[0m\n%s:%d\n", __FILE__, __LINE__);                  \
+        fprintf(stderr, "\n> \e[31mErr - Test failed.\e[0m\n%s:%d\n", __FILE__, __LINE__);                  \
         return;                                                                                    \
     }
 

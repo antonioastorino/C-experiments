@@ -9,7 +9,7 @@
 String String_new(const char* format, ...)
 {
     va_list args;
-    char* tmp_str_p;
+    char* tmp_str_p = NULL;
     va_start(args, format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
     if (vasprintf(&tmp_str_p, format, args) == -1)
@@ -22,7 +22,7 @@ String String_new(const char* format, ...)
     size_t allocated_size = actual_size * 2;
     // printf("Allocated size: %zu\n", allocated_size);
     tmp_str_p = (char*)reallocf(tmp_str_p, sizeof(char) * allocated_size);
-    LOG(TRACE, "Created string: %s\n", tmp_str_p)
+    LOG(TRACE, "Created string: %s", tmp_str_p)
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
     String string_obj = {.str = tmp_str_p, .length = actual_size, .size = allocated_size};
@@ -33,7 +33,7 @@ String String_new(const char* format, ...)
 void String_renew(String* string_obj_p, const char* new_format, ...)
 {
     va_list args;
-    char* tmp_str_p;
+    char* tmp_str_p = NULL;
     va_start(args, new_format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
     if (vasprintf(&tmp_str_p, new_format, args) == -1)
@@ -91,7 +91,7 @@ int String_display(const String* string_obj_p)
     {
         if (string_obj_p->str[i] == '\0')
         {
-            printf("<null>");
+            printf("<>");
         }
         else
         {

@@ -55,7 +55,7 @@ Result_void fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
 {
     Result_void result;
     size_t path_length = p_string_dir_path->length;
-    LOG(TRACE, "Trying to create `%s`\n", p_string_dir_path->str);
+    LOG(TRACE, "Trying to create `%s`", p_string_dir_path->str);
     if (fs_utils_does_exist(p_string_dir_path))
     {
         LOG(TRACE, "The folder already exists.", NULL);
@@ -96,7 +96,7 @@ Result_void fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
         result = fs_utils_mkdir(p_string_dir_path, permission);
         RET_ON_ERR(result)
     }
-    LOG(TRACE, "`%s` successfully created.", p_string_dir_path->str, NULL);
+    LOG(TRACE, "`%s` successfully created.", p_string_dir_path->str);
     return Ok(NULL);
 }
 
@@ -134,7 +134,7 @@ Result_void fs_utils_rm(String* p_string_file_path)
         // It is a file.
         if (unlink(p_string_file_path->str))
         {
-            LOG(TRACE, "Removal failed with errno: %d\n", errno);
+            LOG(TRACE, "Removal failed with errno: %d.", errno);
             result = Err(NULL, "Could not remove file.", errno);
         }
     }
@@ -145,7 +145,7 @@ Result_void fs_utils_rm(String* p_string_file_path)
     }
     fts_close(fts_p);
     RET_ON_ERR(result)
-    LOG(TRACE, "`%s` successfully deleted.\n", p_string_file_path->str);
+    LOG(TRACE, "`%s` successfully deleted.", p_string_file_path->str);
     return Ok(NULL);
 }
 
@@ -162,14 +162,14 @@ Result_void recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
     {
         // We are inside a directory - recurse;
         FTSENT* children = fts_children(fts_p, 0);
-        LOG(TRACE, "Folder `%s` found\n", dir_entry_p->fts_path);
+        LOG(TRACE, "Folder `%s` found", dir_entry_p->fts_path);
         FTSENT* link = children;
         while (link != NULL)
         {
-            LOG(TRACE, "Found child: %s.\n", link->fts_name);
+            LOG(TRACE, "Found child: %s.", link->fts_name);
             // TODO: String_join()
             String child_path_string = String_new("%s/%s", p_string_dir_path->str, link->fts_name);
-            LOG(TRACE, "Trying: %s.\n", child_path_string.str);
+            LOG(TRACE, "Trying: %s.", child_path_string.str);
             // Do your recursion thing.
             result = recursive_rm_r(fts_p, &child_path_string);
             if (result.error_code)
@@ -205,7 +205,7 @@ Result_void recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
 Result_void fs_utils_rm_r(String* p_string_dir_path)
 {
     Result_void result;
-    LOG(INFO, "Trying to remove `%s` recursively \n", p_string_dir_path->str);
+    LOG(INFO, "Trying to remove `%s` recursively.", p_string_dir_path->str);
     char* paths[] = {(char*)p_string_dir_path->str, NULL};
     // Create the received path handle.
     FTS* fts_p = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, NULL);
@@ -220,6 +220,6 @@ Result_void fs_utils_rm_r(String* p_string_dir_path)
     fts_close(fts_p);
     RET_ON_ERR(result)
 
-    LOG(INFO, "`%s` successfully deleted.\n", p_string_dir_path->str);
+    LOG(INFO, "`%s` successfully deleted.", p_string_dir_path->str);
     return Ok(NULL);
 }
