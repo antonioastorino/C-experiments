@@ -5,7 +5,7 @@ void test_fs_utils()
 {
     size_t counter = 0;
     PRINT_BANNER("Testing fs_utils");
-    Result res_void;
+    Result_void_p res_void;
     Error err;
     String* path_string;
 
@@ -16,7 +16,7 @@ void test_fs_utils()
 
     PRINT_TEST_TITLE("mkdir - should fail")
     res_void = fs_utils_mkdir(path_string, 0666);
-    ASSERT_EQ(unwrap_err(res_void).code, 2, "`fs_utils_mkdir` should fail if the folder exists.");
+    ASSERT_EQ(unwrap_err_void_p(res_void).code, 2, "`fs_utils_mkdir` should fail if the folder exists.");
     String_destroy(path_string);
 
     PRINT_TEST_TITLE("mkdir -p - pass")
@@ -42,7 +42,7 @@ void test_fs_utils()
 
     PRINT_TEST_TITLE("rmdir - fail")
     path_string = unwrap_String_p(String_new("test/artifacts/non-empty-0"));
-    err         = unwrap_err(fs_utils_rmdir(path_string));
+    err         = unwrap_err_void_p(fs_utils_rmdir(path_string));
     printf("%s, errno: %d\n", err.message, err.code);
     ASSERT_EQ(err.code, 66, "`fs_utils_rmdir` should fail if the folder is not empty.");
     String_destroy(path_string);
@@ -64,7 +64,7 @@ void test_fs_utils()
     PRINT_TEST_TITLE("rm -r - fail")
     path_string = unwrap_String_p(String_new("test/artifacts/missing"));
     res_void    = fs_utils_rm_r(path_string);
-    ASSERT_EQ(unwrap_err(res_void).code, 2,
+    ASSERT_EQ(unwrap_err_void_p(res_void).code, 2,
               "`fs_utils_rm_r` should fail if the folder is missing.");
     String_destroy(path_string);
 

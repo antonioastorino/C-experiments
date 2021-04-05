@@ -4,7 +4,7 @@
 void test_class_string()
 {
     size_t counter = 0;
-    Result res_void;
+    Result_void_p res_void;
     String* test_string_p;
     PRINT_BANNER("String class")
 

@@ -2,13 +2,19 @@
 BASE_DIR="$(dirname $0)/.."
 
 LOG_FILE="${BASE_DIR}/test/test.log"
-[ "$1" = "test" ] && MODE="test" || MODE="app"
+if [ "$1" = "test" ]; then
+    MODE="test"
+elif [ "$1" = "debug" ]; then
+    MODE="debug"
+else
+    MODE="app"
+fi
 
 pushd "${BASE_DIR}" >/dev/null
 /bin/rm -r test/artifacts/*
 /bin/rm "${LOG_FILE}"
 
-if [ "${MODE}" = "test" ]; then
+if [ "${MODE}" = "test" ] || [ "${MODE}" = "debug" ]; then
     make clean
     # Set up dir entries for testing.
     mkdir -p test/artifacts/empty/ \
@@ -26,21 +32,26 @@ else
 fi
 /bin/rm -f *.bak
 echo -e "\n\n --- Building and running ${MODE} --- \n\n"
-make && ./prj-out-0 2>"${LOG_FILE}"
-
-RET_VAL=$?
-if [ ${RET_VAL} -ne 0 ]; then
-    echo -e "\n\n\e[31mFAIL\e[0m - Execution interrupted with error code ${RET_VAL}.\n\n"
-    exit ${RET_VAL}
-fi
-
-if [ -f "${LOG_FILE}" ]; then
-    if [ "$(cat ${LOG_FILE})" = "" ]; then
-        echo -e "\n\n\e[32mSUCCESS:\e[0m - All tests passed.\n\n"
-    else
-        echo -e "\n\n\e[31mFAIL\e[0m - See ${LOG_FILE} for more info.\n\n"
+if [ "${MODE}" = "test" ]; then
+    make && ./prj-out-0 2>"${LOG_FILE}"
+    RET_VAL=$?
+    if [ ${RET_VAL} -ne 0 ]; then
+        echo -e "\n\n\e[31mFAIL\e[0m - Execution interrupted with error code ${RET_VAL}.\n\n"
+        exit ${RET_VAL}
     fi
+
+    if [ -f "${LOG_FILE}" ]; then
+        if [ "$(cat ${LOG_FILE})" = "" ]; then
+            echo -e "\n\n\e[32mSUCCESS:\e[0m - All tests passed.\n\n"
+        else
+            echo -e "\n\n\e[31mFAIL\e[0m - See ${LOG_FILE} for more info.\n\n"
+        fi
+    else
+        echo -e "\n\n\e[31mApplication not run.\e[0m\n\n"
+    fi
+elif [ "${MODE}" = "debug" ]; then
+    make && lldb ./prj-out-0
 else
-    echo -e "\n\n\e[31mApplication not run.\e[0m\n\n"
+    make && ./prj-out-0
 fi
 popd >/dev/null

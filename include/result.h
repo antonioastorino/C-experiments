@@ -4,14 +4,14 @@
 typedef struct class_string String;
 
 #include <stdbool.h>
-typedef enum {
-    type_int,
-    type_float,
-    type_char_p,
-    type_void_p,
-    type_String_p,
-    type_error,
-} ResultType;
+// typedef enum {
+//     type_int,
+//     type_float,
+//     type_char_p,
+//     type_void_p,
+//     type_String_p,
+//     type_error,
+// } ResultType;
 
 typedef union {
     int ret_int;
@@ -26,18 +26,15 @@ typedef struct {
     int code;
 } Error;
 
-typedef struct {
-    ResultType type;
-    Error err;
-    ReturnValue ok;
-} Result;
-
 #define RESULT_TYPE_h(suffix, ret_type)                                                            \
-    Result Ok_##suffix(ret_type);                                                                  \
-    ret_type unwrap_##suffix(Result);
-
-Result Err(const char* message, int code);
-Error unwrap_err(Result);
+    typedef struct {                                                                               \
+        Error err;                                                                                 \
+        ReturnValue ok;                                                                            \
+    } Result_##suffix;                                                                             \
+    Result_##suffix Ok_##suffix(ret_type);                                                         \
+    Result_##suffix Err_##suffix(const char*, int);                                                \
+    Error unwrap_err_##suffix(Result_##suffix);                                                    \
+    ret_type unwrap_##suffix(Result_##suffix);
 
 RESULT_TYPE_h(int, int);
 RESULT_TYPE_h(float, float);
@@ -53,8 +50,32 @@ RESULT_TYPE_h(String_p, String*);
         String *   : Ok_String_p,                                                                   \
         void *    : Ok_void_p)(ret_value);
 
+#define Err(type, message, code)                                                                   \
+    _Generic(type,                                                                             \
+        int : Err_int,                                                                               \
+        float : Err_float,                                                                           \
+        const char* : Err_char_p,                                                                    \
+        String *   : Err_String_p,                                                                   \
+        void *    : Err_void_p)(message, code);
+
+#define unwrap(ret_value)                                                                          \
+    _Generic(ret_value, Result_int                                                                 \
+             : unwrap_int, Result_float                                                            \
+             : unwrap_float, Result_char_p                                                         \
+             : unwrap_char_p, Result_String_p                                                      \
+             : unwrap_String_p, Result_void_p                                                      \
+             : unwrap_void_p)(ret_value);
+
+#define unwrap_err(ret_value)                                                                      \
+    _Generic(ret_value, Result_int                                                                 \
+             : unwrap_Err_int, Result_float                                                        \
+             : unwrap_Err_float, Result_char_p                                                     \
+             : unwrap_Err_char_p, Result_String_p                                                  \
+             : unwrap_Err_String_p, Result_void_p                                                  \
+             : unwrap_Err_void_p)(ret_value);
+
 /// Return an error if `result` is an error.
 #define RET_ON_ERR(result)                                                                         \
-    if (result.type == type_error) { return result; }
+    if (result.err.code) { return result; }
 
 #endif

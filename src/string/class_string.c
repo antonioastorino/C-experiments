@@ -6,16 +6,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-Result String_new(const char* format, ...)
+Result_String_p String_new(const char* format, ...)
 {
     va_list args;
     char* tmp_str_p = NULL;
+    String* out_p_string_obj;
     va_start(args, format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
     if (vasprintf(&tmp_str_p, format, args) == -1)
     {
         LOG(ERROR, "Something went wrong with vasprintf - errno: %d", errno)
-        return Err("Failed to create string.", errno);
+        return Err(out_p_string_obj, "Failed to create string.", errno);
     }
     size_t actual_size = strlen(tmp_str_p);
     // Allocate twice the required length
@@ -25,17 +26,17 @@ Result String_new(const char* format, ...)
     LOG(TRACE, "Created string: %s", tmp_str_p)
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
-    String* out_p_string_obj = (String*)malloc(sizeof(char*) + 2*sizeof(size_t));
+    out_p_string_obj = (String*)malloc(sizeof(char*) + 2 * sizeof(size_t));
     out_p_string_obj->str    = tmp_str_p;
     out_p_string_obj->length = actual_size;
     out_p_string_obj->size   = allocated_size;
     return Ok(out_p_string_obj);
 }
 
-Result String_renew(String* string_obj_p, const char* new_format, ...)
+Result_void_p String_renew(String* string_obj_p, const char* new_format, ...)
 {
     if ((string_obj_p == NULL) || (string_obj_p->str == NULL)){
-        return Err("The provided string points to NULL.", -1);
+        return Err(NULL, "The provided string points to NULL.", -1);
     }
     va_list args;
     char* tmp_str_p = NULL;
@@ -43,7 +44,7 @@ Result String_renew(String* string_obj_p, const char* new_format, ...)
     // Calculate how many bytes are needed (excluding the terminating '\0').
     if (vasprintf(&tmp_str_p, new_format, args) == -1)
     {
-        return Err("Failed to parse format.", errno);
+        return Err(NULL, "Failed to parse format.", errno);
     }
     size_t new_len = strlen(tmp_str_p);
 
@@ -69,11 +70,11 @@ void String_destroy(String* string_obj_p)
     string_obj_p = NULL;
 }
 
-Result String_print(const String* string_obj_p)
+Result_void_p String_print(const String* string_obj_p)
 {
     if (string_obj_p == NULL)
     {
-        return Err("Uninitialized string.", -1);
+        return Err(NULL, "Uninitialized string.", -1);
     }
     for (size_t i = 0; i < string_obj_p->length; i++)
     {
@@ -82,19 +83,19 @@ Result String_print(const String* string_obj_p)
     return Ok(NULL);
 }
 
-Result String_println(const String* string_obj_p)
+Result_void_p String_println(const String* string_obj_p)
 {
-    Result result = String_print(string_obj_p);
+    Result_void_p result = String_print(string_obj_p);
     RET_ON_ERR(result);
     printf("\n");
     return result;
 }
 
-Result String_display(const String* string_obj_p)
+Result_void_p String_display(const String* string_obj_p)
 {
     if (string_obj_p == NULL)
     {
-        return Err("Uninitialized string.", -1);
+        return Err(NULL, "Uninitialized string.", -1);
     }
     printf("String: `");
     for (size_t i = 0; i < string_obj_p->size; i++)

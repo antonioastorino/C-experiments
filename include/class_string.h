@@ -15,16 +15,16 @@ typedef struct class_string
 } String;
 
 /**************************************** (De)Constructors ****************************************/
-Result String_new(const char*, ...);
+Result_String_p String_new(const char*, ...);
 // Replace the internal string and reallocate its memory if necessary.
-Result String_renew(String*, const char*, ...);
+Result_void_p String_renew(String*, const char*, ...);
 
 void String_destroy(String*);
 
 /******************************************** Printers ********************************************/
-Result String_print(const String*);
-Result String_println(const String*);
-Result String_display(const String*);
+Result_void_p String_print(const String*);
+Result_void_p String_println(const String*);
+Result_void_p String_display(const String*);
 
 /******************************************** Checkers ********************************************/
 bool String_starts_with(String*, const char*);

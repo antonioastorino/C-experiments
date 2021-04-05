@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 // Private.
-Result recursive_rm_r(FTS*, String*);
+Result_void_p recursive_rm_r(FTS*, String*);
 
 bool fs_utils_does_exist(String* p_path)
 {
@@ -24,9 +24,9 @@ bool fs_utils_does_exist(String* p_path)
 }
 
 /* ------------------------------------------ Folders ------------------------------------------- */
-Result fs_utils_mkdir(String* p_string_dir_path, mode_t permission)
+Result_void_p fs_utils_mkdir(String* p_string_dir_path, mode_t permission)
 {
-    Result result;
+    Result_void_p result = Ok(NULL);
     // Save the current mode mask and reset the mask.
     mode_t old_mask = umask(0);
     if (!fs_utils_does_exist(p_string_dir_path))
@@ -34,7 +34,7 @@ Result fs_utils_mkdir(String* p_string_dir_path, mode_t permission)
         LOG(TRACE, "Trying to create %s", p_string_dir_path->str);
         if (mkdir(p_string_dir_path->str, permission) == -1)
         {
-            result = Err("Failed to create folder.", errno);
+            result = Err(NULL, "Failed to create folder.", errno);
         }
         else
         {
@@ -44,17 +44,17 @@ Result fs_utils_mkdir(String* p_string_dir_path, mode_t permission)
     }
     else
     {
-        result = Err("The folder already exists.", errno);
+        result = Err(NULL, "The folder already exists.", errno);
     }
     // Restore the previous mask.
     umask(old_mask);
     return result;
 }
 
-Result fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
+Result_void_p fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
 {
-    Result result;
-    size_t path_length = p_string_dir_path->length;
+    Result_void_p result = Ok(NULL);
+    size_t path_length   = p_string_dir_path->length;
     LOG(TRACE, "Trying to create `%s`", p_string_dir_path->str);
     if (fs_utils_does_exist(p_string_dir_path))
     {
@@ -78,7 +78,7 @@ Result fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
             LOG(TRACE, "Trying to create `%s`.", partial_path);
 
             // Check if this path exists or try to create it.
-            String* string_partial_path = unwrap_String_p(String_new(partial_path));
+            String* string_partial_path = unwrap(String_new(partial_path));
             if (!fs_utils_does_exist(string_partial_path))
             {
                 result = fs_utils_mkdir(string_partial_path, permission);
@@ -102,7 +102,7 @@ Result fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
     return Ok(NULL);
 }
 
-Result fs_utils_rmdir(String* p_string_dir_path)
+Result_void_p fs_utils_rmdir(String* p_string_dir_path)
 {
     LOG(INFO, "Trying to remove `%s` folder.", p_string_dir_path->str);
     if (rmdir(p_string_dir_path->str))
@@ -111,7 +111,7 @@ Result fs_utils_rmdir(String* p_string_dir_path)
         String* error_message
             = unwrap_String_p(String_new("Failed to delete `%s`.", p_string_dir_path->str));
         String_destroy(error_message);
-        return Err(error_message->str, errno);
+        return Err(NULL, error_message->str, errno);
     }
 
     LOG(INFO, "`%s` folder successfully removed.", p_string_dir_path->str);
@@ -119,15 +119,15 @@ Result fs_utils_rmdir(String* p_string_dir_path)
 }
 
 /* ------------------------------------------- Files -------------------------------------------- */
-Result fs_utils_rm(String* p_string_file_path)
+Result_void_p fs_utils_rm(String* p_string_file_path)
 {
-    Result result;
-    char* paths[] = {p_string_file_path->str, NULL};
+    Result_void_p result = Ok(NULL);
+    char* paths[]        = {p_string_file_path->str, NULL};
     // Create the received path handle.
     FTS* fts_p = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, NULL);
     if (fts_p == NULL)
     {
-        return Err("Failed to initialize fts", errno);
+        return Err(NULL, "Failed to initialize fts", errno);
     }
     /*
       Get next entry (could be file or directory). No need to check for ENOENT because we just
@@ -140,7 +140,7 @@ Result fs_utils_rm(String* p_string_file_path)
         if (unlink(p_string_file_path->str))
         {
             LOG(TRACE, "Removal failed with errno: %d.", errno);
-            result = Err("Could not remove file.", errno);
+            result = Err(NULL, "Could not remove file.", errno);
         }
     }
     else
@@ -152,13 +152,13 @@ Result fs_utils_rm(String* p_string_file_path)
     String_destroy(p_string_file_path);
     RET_ON_ERR(result)
     LOG(TRACE, "`%s` successfully deleted.", p_string_file_path->str);
-    return Ok(NULL);
+    return result;
 }
 
 /* ------------------------------------- Files and folders -------------------------------------- */
-Result recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
+Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
 {
-    Result result;
+    Result_void_p result = Ok(NULL);
     /*
     Get next entry (could be file or directory). No need to check for ENOENT because we just found
     it.
@@ -199,22 +199,22 @@ Result recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
         if (unlink(p_string_dir_path->str))
         {
             LOG(ERROR, "Removal failed with errno: %d.", errno);
-            return Err("Could not remove file.", errno);
+            return Err(NULL, "Could not remove file.", errno);
         }
     }
-    return Ok(NULL);
+    return result;
 }
 
-Result fs_utils_rm_r(String* p_string_dir_path)
+Result_void_p fs_utils_rm_r(String* p_string_dir_path)
 {
-    Result result;
+    Result_void_p result = Ok(NULL);
     LOG(INFO, "Trying to remove `%s` recursively.", p_string_dir_path->str);
     char* paths[] = {(char*)p_string_dir_path->str, NULL};
     // Create the received path handle.
     FTS* fts_p = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, NULL);
     if (fts_p == NULL)
     {
-        result = Err("Failed to initialize fts", errno);
+        result = Err(NULL, "Failed to initialize fts", errno);
         fts_close(fts_p);
         return result;
     }
@@ -224,5 +224,5 @@ Result fs_utils_rm_r(String* p_string_dir_path)
     RET_ON_ERR(result)
 
     LOG(INFO, "`%s` successfully deleted.", p_string_dir_path->str);
-    return Ok(NULL);
+    return result;
 }
