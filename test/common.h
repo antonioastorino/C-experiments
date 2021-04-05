@@ -22,4 +22,4 @@
     }                                                                                              \
     printf("\n");
 
-#define PRINT_TEST_TITLE(title) printf("\n------- T:%lu - %s -------\n", ++counter, title);
+#define PRINT_TEST_TITLE(title) printf("\n------- T:%lu < %s > -------\n", ++counter, title);

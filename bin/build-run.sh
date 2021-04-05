@@ -27,7 +27,7 @@ if [ "${MODE}" = "test" ] || [ "${MODE}" = "debug" ]; then
 
     touch test/artifacts/non-empty/inner/file.txt
     touch test/artifacts/non-empty/inner/inner_l2/file.txt
-    touch test/artifacts/deleteme.txt
+    touch test/artifacts/delete_me.txt
 
     sed -i.bak 's/^#define TEST 0/#define TEST 1/' src/main.c
 else

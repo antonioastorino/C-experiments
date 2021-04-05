@@ -10,7 +10,6 @@
 #define TEST 1
 
 #if TEST
-#include "../test/common.c"
 #include "../test/test_class_string.c"
 #include "../test/test_fs_utils.c"
 #include "../test/test_logger.c"
@@ -32,7 +31,7 @@ int main(int argc, char** argv)
 #else
     printf("Run 'bin/build-run.sh test' to run the unit tests\n");
     // insert code here...
-    FILE* file_1 = fopen("/Volumes/DataMBP/deleteme/file1.txt", "w+");
+    FILE* file_1 = fopen("/Volumes/DataMBP/delete_me/file1.txt", "w+");
     if (file_1 == NULL)
     {
         fprintf(stderr, "Failed to open file: errno %d\n", errno);

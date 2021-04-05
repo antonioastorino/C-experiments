@@ -1,4 +1,5 @@
-#include "../include/logger.h"
+#include "common.h"
+#include "logger.h"
 
 void test_logger()
 {
