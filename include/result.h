@@ -59,20 +59,20 @@ RESULT_TYPE_h(String_p, String*);
         void *    : Err_void_p)(message, code);
 
 #define unwrap(ret_value)                                                                          \
-    _Generic(ret_value, Result_int                                                                 \
+    _Generic((ret_value), Result_int                                                               \
              : unwrap_int, Result_float                                                            \
              : unwrap_float, Result_char_p                                                         \
              : unwrap_char_p, Result_String_p                                                      \
              : unwrap_String_p, Result_void_p                                                      \
-             : unwrap_void_p)(ret_value);
+             : unwrap_void_p)(ret_value)
 
 #define unwrap_err(ret_value)                                                                      \
-    _Generic(ret_value, Result_int                                                                 \
-             : unwrap_Err_int, Result_float                                                        \
-             : unwrap_Err_float, Result_char_p                                                     \
-             : unwrap_Err_char_p, Result_String_p                                                  \
-             : unwrap_Err_String_p, Result_void_p                                                  \
-             : unwrap_Err_void_p)(ret_value);
+    _Generic((ret_value), Result_int                                                               \
+             : unwrap_err_int, Result_float                                                        \
+             : unwrap_err_float, Result_char_p                                                     \
+             : unwrap_err_char_p, Result_String_p                                                  \
+             : unwrap_err_String_p, Result_void_p                                                  \
+             : unwrap_err_void_p)(ret_value)
 
 /// Return an error if `result` is an error.
 #define RET_ON_ERR(result)                                                                         \

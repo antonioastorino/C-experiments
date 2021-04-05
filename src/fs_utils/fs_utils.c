@@ -109,7 +109,7 @@ Result_void_p fs_utils_rmdir(String* p_string_dir_path)
     {
         LOG(ERROR, "Failed to delete `%s`.", p_string_dir_path->str)
         String* error_message
-            = unwrap_String_p(String_new("Failed to delete `%s`.", p_string_dir_path->str));
+            = unwrap(String_new("Failed to delete `%s`.", p_string_dir_path->str));
         String_destroy(error_message);
         return Err(NULL, error_message->str, errno);
     }
@@ -175,7 +175,7 @@ Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
             LOG(TRACE, "Found child: %s.", link->fts_name);
             // TODO: String_join()
             String* child_path_string
-                = unwrap_String_p(String_new("%s/%s", p_string_dir_path->str, link->fts_name));
+                = unwrap(String_new("%s/%s", p_string_dir_path->str, link->fts_name));
 
             LOG(TRACE, "Trying: %s.", child_path_string->str);
             // Do your recursion thing.

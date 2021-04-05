@@ -6,17 +6,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool String_is_null(const String *string_obj_p) {
+    if ((string_obj_p == NULL) || (string_obj_p->str == NULL)) return true;
+    return false;
+}
+
 Result_String_p String_new(const char* format, ...)
 {
     va_list args;
     char* tmp_str_p = NULL;
-    String* out_p_string_obj;
+    String* out_string_obj_p;
     va_start(args, format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
     if (vasprintf(&tmp_str_p, format, args) == -1)
     {
         LOG(ERROR, "Something went wrong with vasprintf - errno: %d", errno)
-        return Err(out_p_string_obj, "Failed to create string.", errno);
+        return Err(out_string_obj_p, "Failed to create string.", errno);
     }
     size_t actual_size = strlen(tmp_str_p);
     // Allocate twice the required length
@@ -26,16 +31,20 @@ Result_String_p String_new(const char* format, ...)
     LOG(TRACE, "Created string: %s", tmp_str_p)
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
-    out_p_string_obj = (String*)malloc(sizeof(char*) + 2 * sizeof(size_t));
-    out_p_string_obj->str    = tmp_str_p;
-    out_p_string_obj->length = actual_size;
-    out_p_string_obj->size   = allocated_size;
-    return Ok(out_p_string_obj);
+    out_string_obj_p = (String*)malloc(sizeof(char*) + 2 * sizeof(size_t));
+    out_string_obj_p->str    = tmp_str_p;
+    out_string_obj_p->length = actual_size;
+    out_string_obj_p->size   = allocated_size;
+    return Ok(out_string_obj_p);
+}
+
+Result_String_p String_clone(String* origin) {
+    return String_new(origin->str);
 }
 
 Result_void_p String_renew(String* string_obj_p, const char* new_format, ...)
 {
-    if ((string_obj_p == NULL) || (string_obj_p->str == NULL)){
+    if (String_is_null(string_obj_p)){
         return Err(NULL, "The provided string points to NULL.", -1);
     }
     va_list args;
@@ -66,13 +75,15 @@ void String_destroy(String* string_obj_p)
 {
     free(string_obj_p->str);
     string_obj_p->str = NULL;
+    string_obj_p->length = -1;
+    string_obj_p->size = -1;
     free(string_obj_p);
     string_obj_p = NULL;
 }
 
 Result_void_p String_print(const String* string_obj_p)
 {
-    if (string_obj_p == NULL)
+    if (String_is_null(string_obj_p))
     {
         return Err(NULL, "Uninitialized string.", -1);
     }
@@ -93,7 +104,7 @@ Result_void_p String_println(const String* string_obj_p)
 
 Result_void_p String_display(const String* string_obj_p)
 {
-    if (string_obj_p == NULL)
+    if (String_is_null(string_obj_p))
     {
         return Err(NULL, "Uninitialized string.", -1);
     }
@@ -117,9 +128,10 @@ Result_void_p String_display(const String* string_obj_p)
     return Ok(NULL);
 }
 
-bool String_starts_with(String* p_string, const char* prefix)
-{
-    if (strstr(p_string->str, prefix) == p_string->str)
+// TODO: Result_bool - check if is null
+bool String_starts_with(String* string_p, const char* prefix)
+{  
+    if (strstr(string_p->str, prefix) == string_p->str)
     {
         return true;
     }
@@ -127,4 +139,26 @@ bool String_starts_with(String* p_string, const char* prefix)
     {
         return false;
     }
+}
+
+Result_void_p String_replace_char(String* string_obj_p, const char find, const char replace) {
+    if (String_is_null(string_obj_p)) { return Err(NULL, "Uninitialized string.", -1);}
+    char tmp_str[string_obj_p->length + 1];
+    size_t i=0, j = 0;
+    for (; i < string_obj_p->length; ) {
+        if (string_obj_p->str[i] == find) {
+            if (replace != '\0') {
+                tmp_str[j] = replace;
+                j++;
+            }
+        } else {
+            tmp_str[j] = string_obj_p->str[i];
+            j++;
+        }
+        i++;
+    }
+    tmp_str[j] = '\0';
+
+    strncpy(string_obj_p->str, tmp_str, j+1);
+    return Ok(NULL);
 }

@@ -4,6 +4,9 @@
 // This is where the logging level is selected.
 #define LOG_LEVEL 5
 
+#define LOG_OUT stdout
+#define LOG_ERR stdout
+
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
@@ -24,8 +27,13 @@ void get_datetime(char[], size_t);
         const size_t buf_len = 25;                                                                 \
         char datetime[buf_len];                                                                    \
         get_datetime(datetime, buf_len);                                                           \
-        fprintf(stdout, "%s - " #level "- %s:%d - " format "\n", datetime, __FILENAME__, __LINE__, \
-                args);                                                                             \
+        if ((#level[0] == 'W') || (#level[0] == 'E')) {                                            \
+            fprintf(LOG_ERR, "%s - " #level "- %s:%d - " format "\n", datetime, __FILENAME__,       \
+                    __LINE__, args);                                                               \
+        } else {                                                                                   \
+            fprintf(LOG_OUT, "%s - " #level "- %s:%d - " format "\n", datetime, __FILENAME__,       \
+                    __LINE__, args);                                                               \
+        }                                                                                          \
     } else {                                                                                       \
     }
 

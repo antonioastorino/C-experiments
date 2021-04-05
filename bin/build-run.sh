@@ -44,7 +44,8 @@ if [ "${MODE}" = "test" ]; then
         if [ "$(cat ${LOG_FILE})" = "" ]; then
             echo -e "\n\n\e[32mSUCCESS:\e[0m - All tests passed.\n\n"
         else
-            echo -e "\n\n\e[31mFAIL\e[0m - See ${LOG_FILE} for more info.\n\n"
+            echo -e "\n\n\e[31mFAIL\e[0m - The content of ${LOG_FILE} follows.\n\n"
+            cat "${LOG_FILE}"
         fi
     else
         echo -e "\n\n\e[31mApplication not run.\e[0m\n\n"

@@ -16,9 +16,7 @@ typedef struct class_string
 
 /**************************************** (De)Constructors ****************************************/
 Result_String_p String_new(const char*, ...);
-// Replace the internal string and reallocate its memory if necessary.
-Result_void_p String_renew(String*, const char*, ...);
-
+Result_String_p String_clone(String *);
 void String_destroy(String*);
 
 /******************************************** Printers ********************************************/
@@ -30,5 +28,8 @@ Result_void_p String_display(const String*);
 bool String_starts_with(String*, const char*);
 
 /******************************************* Modifiers ********************************************/
+// Replace the internal string and reallocate memory if necessary.
+Result_void_p String_renew(String*, const char*, ...);
+Result_void_p String_replace_char(String*, const char, const char);
 
 #endif
