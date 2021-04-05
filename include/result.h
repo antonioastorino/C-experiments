@@ -13,7 +13,8 @@ typedef struct class_string String;
 //     type_error,
 // } ResultType;
 
-typedef union {
+typedef union
+{
     int ret_int;
     float ret_float;
     const char* ret_char_p;
@@ -21,13 +22,15 @@ typedef union {
     void* ret_void_p;
 } ReturnValue;
 
-typedef struct {
+typedef struct
+{
     const char* message;
     int code;
 } Error;
 
 #define RESULT_TYPE_h(suffix, ret_type)                                                            \
-    typedef struct {                                                                               \
+    typedef struct                                                                                 \
+    {                                                                                              \
         Error err;                                                                                 \
         ReturnValue ok;                                                                            \
     } Result_##suffix;                                                                             \
@@ -76,6 +79,9 @@ RESULT_TYPE_h(String_p, String*);
 
 /// Return an error if `result` is an error.
 #define RET_ON_ERR(result)                                                                         \
-    if (result.err.code) { return result; }
+    if (result.err.code)                                                                           \
+    {                                                                                              \
+        return result;                                                                             \
+    }
 
 #endif

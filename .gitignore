@@ -3,4 +3,5 @@ MakeFile
 prj-out-*
 *.swp
 *.bak
+*.log
 test/artifacts/*

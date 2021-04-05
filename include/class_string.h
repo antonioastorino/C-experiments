@@ -16,7 +16,7 @@ typedef struct class_string
 
 /**************************************** (De)Constructors ****************************************/
 Result_String_p String_new(const char*, ...);
-Result_String_p String_clone(String *);
+Result_String_p String_clone(String*);
 void String_destroy(String*);
 
 /******************************************** Printers ********************************************/

@@ -60,7 +60,8 @@ void test_fs_utils()
     PRINT_TEST_TITLE("rm -r - fail")
     path_string = unwrap(String_new("test/artifacts/missing"));
     res_void    = fs_utils_rm_r(path_string);
-    ASSERT_EQ(unwrap_err(res_void).code, 2, "`fs_utils_rm_r` should fail if the folder is missing.");
+    ASSERT_EQ(unwrap_err(res_void).code, 2,
+              "`fs_utils_rm_r` should fail if the folder is missing.");
     String_destroy(path_string);
 
     PRINT_TEST_TITLE("rm -r - pass")

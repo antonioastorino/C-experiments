@@ -14,6 +14,9 @@ pushd "${BASE_DIR}" >/dev/null
 /bin/rm -r test/artifacts/*
 /bin/rm "${LOG_FILE}"
 
+for file in $(find . -name "*.c"); do clang-format -i ${file}; done
+for file in $(find . -name "*.h"); do clang-format -i ${file}; done
+
 if [ "${MODE}" = "test" ] || [ "${MODE}" = "debug" ]; then
     make clean
     # Set up dir entries for testing.
