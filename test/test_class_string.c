@@ -60,11 +60,41 @@ void test_class_string()
     ASSERT_EQ(size, test_clone->size, "Size copied");
     String_destroy(test_clone);
 
-    PRINT_TEST_TITLE("replace_char() function");
+    PRINT_TEST_TITLE("replace_char() function - replace with nothing.");
     test_string_p = unwrap(String_new("Some text to be modified."));
-    String_display(test_string_p);
+    String_println(test_string_p);
     unwrap(String_replace_char(test_string_p, ' ', '\0'));
-    String_display(test_string_p);
+    ASSERT_EQ(strcmp(test_string_p->str, "Sometexttobemodified."), 0, "Needles removed correctly.");
+    String_println(test_string_p);
+
+    unwrap(String_replace_char(test_string_p, 't', '_'));
+    ASSERT_EQ(strcmp(test_string_p->str, "Some_ex__obemodified."), 0,
+              "Needles replaced correctly.");
+    String_println(test_string_p);
+
+    unwrap(String_replace_char(test_string_p, '&', '^'));
+    ASSERT_EQ(strcmp(test_string_p->str, "Some_ex__obemodified."), 0,
+              "String unchanged - needle not found.");
+    String_println(test_string_p);
+
+    unwrap(String_replace_char(test_string_p, 'S', '+'));
+    unwrap(String_replace_char(test_string_p, 'o', '+'));
+    unwrap(String_replace_char(test_string_p, 'm', '+'));
+    unwrap(String_replace_char(test_string_p, '_', '+'));
+    unwrap(String_replace_char(test_string_p, 'e', '+'));
+    unwrap(String_replace_char(test_string_p, 'x', '+'));
+    unwrap(String_replace_char(test_string_p, 'b', '+'));
+    unwrap(String_replace_char(test_string_p, 'd', '+'));
+    unwrap(String_replace_char(test_string_p, 'i', '+'));
+    unwrap(String_replace_char(test_string_p, 'f', '+'));
+    unwrap(String_replace_char(test_string_p, '.', '+'));
+    ASSERT_EQ(strcmp(test_string_p->str, "+++++++++++++++++++++"), 0,
+              "Replaced all chars in string with '+'.");
+    String_println(test_string_p);
+
+    unwrap(String_replace_char(test_string_p, '+', '\0'));
+    ASSERT_EQ(strcmp(test_string_p->str, ""), 0, "Ths string is correctly emptied.");
+    ASSERT_EQ(test_string_p->length, 0, "Ths length is correctly set to 0.");
+    String_println(test_string_p);
     String_destroy(test_string_p);
-    exit(0);
 }

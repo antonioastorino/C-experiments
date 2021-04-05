@@ -142,33 +142,36 @@ bool String_starts_with(String* string_p, const char* prefix)
     }
 }
 
-Result_void_p String_replace_char(String* string_obj_p, const char find, const char replace)
+Result_void_p String_replace_char(String* string_obj_haystack_p, const char needle,
+                                  const char replace)
 {
-    if (String_is_null(string_obj_p))
+    if (String_is_null(string_obj_haystack_p))
     {
         return Err(NULL, "Uninitialized string.", -1);
     }
-    char tmp_str[string_obj_p->length + 1];
+    char tmp_str[string_obj_haystack_p->length + 1];
     size_t i = 0, j = 0;
-    for (; i < string_obj_p->length;)
+    for (; i < string_obj_haystack_p->length;)
     {
-        if (string_obj_p->str[i] == find)
+        if (string_obj_haystack_p->str[i] == needle)
         {
             if (replace != '\0')
             {
+                // Replace the current char with that provided.
                 tmp_str[j] = replace;
                 j++;
             }
         }
         else
         {
-            tmp_str[j] = string_obj_p->str[i];
+            tmp_str[j] = string_obj_haystack_p->str[i];
             j++;
         }
         i++;
     }
     tmp_str[j] = '\0';
-
-    strncpy(string_obj_p->str, tmp_str, j + 1);
+    // Update the string length in case some chars were removed.
+    string_obj_haystack_p->length = j;
+    strncpy(string_obj_haystack_p->str, tmp_str, j + 1);
     return Ok(NULL);
 }
