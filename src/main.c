@@ -10,6 +10,7 @@
 #define TEST 1
 
 #if TEST
+#include "../test/test_class_json.c"
 #include "../test/test_class_string.c"
 #include "../test/test_fs_utils.c"
 #include "../test/test_logger.c"
@@ -25,9 +26,10 @@ int main(int argc, char** argv)
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
 #if TEST
+    // test_fs_utils();
+    // test_logger();
     test_class_string();
-    test_fs_utils();
-    test_logger();
+    test_class_json();
 #else
     printf("Run 'bin/build-run.sh test' to run the unit tests\n");
     // insert code here...

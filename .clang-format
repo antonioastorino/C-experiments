@@ -13,3 +13,4 @@ AccessModifierOffset: -4
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 BreakBeforeBinaryOperators: All
 BreakBeforeBraces: Allman
+UseTab: Never

@@ -1,0 +1,13 @@
+{
+	"text_key": "text_value",
+	"text_sibling": "sibling_value",
+	"item_key": {
+		"id": "file",
+		"value": "File",
+		"popup": {
+			"menuitem": "CreateNewDoc()",
+			"onclick": "OpenDoc()",
+			"value": "Close"
+		}
+	}
+}

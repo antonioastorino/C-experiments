@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define SIZE_FACTOR 1.5
+
 bool String_is_null(const String* string_obj_p)
 {
     if ((string_obj_p == NULL) || (string_obj_p->str == NULL))
@@ -27,10 +29,10 @@ Result_String_p String_new(const char* format, ...)
     }
     size_t actual_size = strlen(tmp_str_p);
     // Allocate twice the required length
-    size_t allocated_size = actual_size * 2;
+    size_t allocated_size = (size_t)(actual_size * SIZE_FACTOR);
     // printf("Allocated size: %zu\n", allocated_size);
     tmp_str_p = (char*)reallocf(tmp_str_p, sizeof(char) * allocated_size);
-    LOG(TRACE, "Created string: %s", tmp_str_p)
+    LOG(TRACE, "Created %s.", "string")
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
     out_string_obj_p         = (String*)malloc(sizeof(char*) + 2 * sizeof(size_t));
@@ -40,7 +42,7 @@ Result_String_p String_new(const char* format, ...)
     return Ok(out_string_obj_p);
 }
 
-Result_String_p String_clone(String* origin) { return String_new(origin->str); }
+Result_String_p String_clone(const String* origin) { return String_new(origin->str); }
 
 Result_void_p String_renew(String* string_obj_p, const char* new_format, ...)
 {
@@ -58,17 +60,17 @@ Result_void_p String_renew(String* string_obj_p, const char* new_format, ...)
     }
     size_t new_len = strlen(tmp_str_p);
 
+    // Update string.
     if (new_len >= string_obj_p->size)
     {
-        string_obj_p->str  = (char*)reallocf(string_obj_p->str, sizeof(char) * new_len * 2);
-        string_obj_p->size = new_len * 2;
+        // Increase the allocated size.
+        string_obj_p->size = (size_t)(new_len * SIZE_FACTOR);
+        string_obj_p->str  = (char*)reallocf(string_obj_p->str, sizeof(char) * string_obj_p->size);
     }
+    string_obj_p->length = new_len;
     // Copy an extra byte for the NULL characther.
-    printf("Old string: %s\n", string_obj_p->str);
-    printf("New string: %s\n", tmp_str_p);
     strncpy(string_obj_p->str, tmp_str_p, new_len + 1);
     free(tmp_str_p);
-    string_obj_p->length = new_len;
     return Ok(NULL);
 }
 
@@ -151,24 +153,23 @@ Result_void_p String_replace_char(String* string_obj_haystack_p, const char need
     }
     char tmp_str[string_obj_haystack_p->length + 1];
     size_t i = 0, j = 0;
-    for (; i < string_obj_haystack_p->length;)
+    while (i < string_obj_haystack_p->length)
     {
         if (string_obj_haystack_p->str[i] == needle)
         {
             if (replace != '\0')
             {
                 // Replace the current char with that provided.
-                tmp_str[j] = replace;
-                j++;
+                tmp_str[j++] = replace;
             }
         }
         else
         {
-            tmp_str[j] = string_obj_haystack_p->str[i];
-            j++;
+            tmp_str[j++] = string_obj_haystack_p->str[i];
         }
         i++;
     }
+    // Terminate.
     tmp_str[j] = '\0';
     // Update the string length in case some chars were removed.
     string_obj_haystack_p->length = j;

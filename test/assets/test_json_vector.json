@@ -1,0 +1,12 @@
+[
+	{
+		"item1": [
+			1,
+			2
+		],
+		"item2": "string_type"
+	},
+	{
+		"another": 34
+	}
+]

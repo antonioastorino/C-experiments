@@ -48,5 +48,6 @@
 RESULT_TYPE_c(int, int);
 RESULT_TYPE_c(float, float);
 RESULT_TYPE_c(char_p, const char*);
-RESULT_TYPE_c(void_p, void*);
 RESULT_TYPE_c(String_p, String*);
+RESULT_TYPE_c(JsonObj_p, JsonObj*);
+RESULT_TYPE_c(void_p, void*);

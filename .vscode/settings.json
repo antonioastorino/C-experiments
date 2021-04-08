@@ -28,7 +28,11 @@
 		"utility": "c",
 		"vector": "c",
 		"ranges": "c",
-		"class_string.h": "c"
+		"class_string.h": "c",
+		"__node_handle": "c",
+		"cstdlib": "c",
+		"optional": "c",
+		"thread": "c"
 	},
 	"cSpell.words": [
 		"println"

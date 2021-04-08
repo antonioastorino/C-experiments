@@ -13,23 +13,23 @@ void test_class_string()
     const char* str = "Hello everybody";
     test_string_p   = unwrap(String_new(str));
     ASSERT_EQ(test_string_p->length, strlen(str), "Length correct.")
-    ASSERT_EQ(test_string_p->size, strlen(str) * 2, "Size correct.")
+    ASSERT_EQ(test_string_p->size, (size_t)(strlen(str) * 1.5), "Size correct.")
     ASSERT_EQ(unwrap(String_println(test_string_p)), NULL, "Printing functions work.")
     ASSERT_EQ(unwrap(String_display(test_string_p)), NULL, "Display functions work.")
     String_destroy(test_string_p);
 
     PRINT_TEST_TITLE("New from formatter");
-    const char* format1   = "The number is";
+    const char* format1   = "Old string content.";
     test_string_p         = unwrap(String_new(format1));
     size_t initial_length = strlen(test_string_p->str);
-    size_t initial_size   = initial_length * 2;
+    size_t initial_size   = (size_t)(initial_length * 1.5);
     ASSERT_EQ(test_string_p->length, initial_length, "Length correct.")
     ASSERT_EQ(test_string_p->size, initial_size, "Size correct.")
     ASSERT_EQ(unwrap(String_println(test_string_p)), NULL, "Printing functions work.")
     ASSERT_EQ(unwrap(String_display(test_string_p)), NULL, "Display functions work.")
 
     PRINT_TEST_TITLE("Renew without resizing");
-    unwrap(String_renew(test_string_p, "The new string content."));
+    unwrap(String_renew(test_string_p, "New string content -longer."));
     ASSERT_EQ(test_string_p->length, strlen(test_string_p->str), "Length correct.")
     ASSERT_EQ(test_string_p->size, initial_size, "Size correct.")
     ASSERT_EQ(unwrap(String_println(test_string_p)), NULL, "Printing functions work.")
@@ -38,7 +38,7 @@ void test_class_string()
     PRINT_TEST_TITLE("Renew with resizing");
     unwrap(String_renew(test_string_p, "The new string content is way too long."));
     ASSERT_EQ(test_string_p->length, strlen(test_string_p->str), "Length correct.")
-    ASSERT_EQ(test_string_p->size, test_string_p->length * 2, "Size correct.")
+    ASSERT_EQ(test_string_p->size, (size_t)(test_string_p->length * 1.5), "Size correct.")
     ASSERT_EQ(unwrap(String_println(test_string_p)), NULL, "Printing functions work.")
     ASSERT_EQ(unwrap(String_display(test_string_p)), NULL, "Display functions work.")
 
