@@ -58,7 +58,7 @@ Result_void_p fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
     LOG(TRACE, "Trying to create `%s`", p_string_dir_path->str);
     if (fs_utils_does_exist(p_string_dir_path))
     {
-        LOG(TRACE, "The folder already exists.", NULL);
+        LOG(TRACE, "The folder already exists.");
         return Ok(NULL);
     }
     char partial_path[path_length + 1];

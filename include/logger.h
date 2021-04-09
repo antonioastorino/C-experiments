@@ -22,21 +22,27 @@
 
 void get_datetime(char[], size_t);
 
-#define LOG(level, format, args...)                                                                \
+#define LOG(level, args...)                                                                        \
     if (LOG_LEVEL >= LOG_LEVEL_##level)                                                            \
     {                                                                                              \
         const size_t buf_len = 25;                                                                 \
         char datetime[buf_len];                                                                    \
         get_datetime(datetime, buf_len);                                                           \
+        char log_message[1024];                                                                    \
+        if (snprintf(log_message, 1024, args) > 1023)                                              \
+        {                                                                                          \
+            fprintf(LOG_ERR, "WARN: the following log message is longer "                          \
+                             "that maximum allowed (1024 bytes).\n");                              \
+        }                                                                                          \
         if ((#level[0] == 'W') || (#level[0] == 'E'))                                              \
         {                                                                                          \
-            fprintf(LOG_ERR, "%s - " #level "- %s:%d - " format "\n", datetime, __FILENAME__,      \
-                    __LINE__, args);                                                               \
+            fprintf(LOG_ERR, "%s - " #level "- %s:%d - %s.\n", datetime, __FILENAME__, __LINE__,   \
+                    log_message);                                                                  \
         }                                                                                          \
         else                                                                                       \
         {                                                                                          \
-            fprintf(LOG_OUT, "%s - " #level "- %s:%d - " format "\n", datetime, __FILENAME__,      \
-                    __LINE__, args);                                                               \
+            fprintf(LOG_OUT, "%s - " #level "- %s:%d - %s.\n", datetime, __FILENAME__, __LINE__,   \
+                    log_message);                                                                  \
         }                                                                                          \
     }                                                                                              \
     else                                                                                           \
