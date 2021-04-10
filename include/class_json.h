@@ -41,11 +41,11 @@ typedef struct json_value
     ValueType value_type;
     union
     {
-        int value_int;            // leaf int
-        float value_float;        // leaf float
-        const char* value_char_p; // leaf c-string
-        struct json_item* child;  // another item
-                                  // TODO: add array
+        int value_int;             // leaf int
+        float value_float;         // leaf float
+        const char* value_char_p;  // leaf c-string
+        struct json_item* child_p; // another item
+                                   // TODO: add array
     };
 } JsonValue;
 
@@ -69,5 +69,6 @@ void JsonObj_destroy(JsonObj*);
 void JsonObj_get_tokens(String*);
 
 const char* get_value_char_p(const JsonItem*, const char*);
+JsonItem* get_value_item_p(const JsonItem*, const char*);
 
 #endif

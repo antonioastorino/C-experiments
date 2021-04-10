@@ -1,13 +1,12 @@
 {
 	"text_key": "text_value",
 	"text_sibling": "sibling_value",
-	"item_key": {
-		"id": "file",
-		"value": "File",
-		"popup": {
-			"menuitem": "CreateNewDoc()",
-			"onclick": "OpenDoc()",
-			"value": "Close"
-		}
+	"nested": {
+		"object_a": "item_a",
+		"object_b": "item_b"
+	},
+	"nested2": {
+		"object_1": "item_1",
+		"object_2": "item_2"
 	}
 }

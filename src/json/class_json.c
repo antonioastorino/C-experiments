@@ -31,7 +31,8 @@ ValueType get_value_type(char* initial_char_p)
     else if (initial_char_p[0] == '"')
         return C_STR;
     else
-        return INT;
+        printf("GOT: '%c%c'", initial_char_p[0], initial_char_p[1]);
+    return INVALID;
 }
 
 // bool validate_tokens_str(const char* tokens_str_p) { while () }
@@ -163,6 +164,13 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
     printf("\n\nStarting\n\n");
     while ((curr_pos[0] != '\0') && (curr_pos[1] != '\0'))
     {
+        if (curr_pos[0] == '}')
+        {
+            // Object ends
+            curr_pos++;
+            // Use continue to make sure the next 2 chars are checked.
+            continue;
+        }
         switch (get_value_type(curr_pos))
         {
         case INT:
@@ -201,7 +209,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
                 else
                 {
                     new_item->parent             = curr_item;
-                    curr_item->value->child      = new_item;
+                    curr_item->value->child_p    = new_item;
                     curr_item->value->value_type = JSON_ITEM;
                 }
             }
@@ -222,6 +230,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
                 printf("something bad happened\n");
                 exit(4);
             }
+            curr_pos++; // Skip the ':'.
             printf("Got key:\t%s\n", curr_item->key_p);
             printf("Remaining string: %s\n", curr_pos);
             break;
@@ -273,5 +282,29 @@ const char* get_value_char_p(const JsonItem* item, const char* key)
     {
         // Try another key
         return get_value_char_p(item->next_sibling, key);
+    }
+}
+
+JsonItem* get_value_item_p(const JsonItem* item, const char* key)
+{
+    if (item == NULL)
+        return NULL;
+    if (!strcmp(item->key_p, key))
+    {
+        // The key matches
+        if (item->value->value_type == JSON_ITEM)
+        {
+
+            return item->value->child_p;
+        }
+        else
+        {
+            exit(6);
+        }
+    }
+    else
+    {
+        // Try another key
+        return get_value_item_p(item->next_sibling, key);
     }
 }

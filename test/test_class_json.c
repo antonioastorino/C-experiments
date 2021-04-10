@@ -41,6 +41,8 @@ void test_class_json()
     String_destroy(json_string_p); // We can delete it.
     printf("Value: %s\n", get_value_char_p(json_obj_p->root_p, "text_key"));
     printf("Value: %s\n", get_value_char_p(json_obj_p->root_p, "text_sibling"));
+    JsonItem* nested_p = get_value_item_p(json_obj_p->root_p, "nested");
+    printf("key: %s", nested_p->key_p);
     // String_println(json_obj_p->tokens_string_p);
     JsonObj_destroy(json_obj_p);
 }
