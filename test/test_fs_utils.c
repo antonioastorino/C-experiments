@@ -4,7 +4,6 @@
 
 void test_fs_utils()
 {
-    size_t counter = 0;
     PRINT_BANNER("Testing fs_utils")
     Result_void_p res_void;
     Error err;

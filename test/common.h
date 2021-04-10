@@ -6,7 +6,8 @@
     }                                                                                              \
     else                                                                                           \
     {                                                                                              \
-        fprintf(stderr, "\n> \e[31mErr - Test failed.\e[0m\n%s:%d\n", __FILE__, __LINE__);         \
+        fprintf(stderr, "\n> \e[31mErr - Test failed.\e[0m\n%s:%d : left != right\n", __FILE__,    \
+                __LINE__);                                                                         \
     }
 
 #define PRINT_BANNER(title)                                                                        \
@@ -20,6 +21,7 @@
     {                                                                                              \
         printf("=");                                                                               \
     }                                                                                              \
-    printf("\n");
+    printf("\n");                                                                                  \
+    size_t counter = 0;
 
 #define PRINT_TEST_TITLE(title) printf("\n------- T:%lu < %s > -------\n", ++counter, title);

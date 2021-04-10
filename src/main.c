@@ -12,6 +12,7 @@
 #if TEST
 #include "../test/test_class_json.c"
 #include "../test/test_class_string.c"
+#include "../test/test_converter.c"
 #include "../test/test_fs_utils.c"
 #include "../test/test_logger.c"
 #endif
@@ -29,6 +30,7 @@ int main(int argc, char** argv)
     // test_fs_utils();
     // test_logger();
     // test_class_string();
+    test_converter();
     test_class_json();
 #else
     printf("Run 'bin/build-run.sh test' to run the unit tests\n");
