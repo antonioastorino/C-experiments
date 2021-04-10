@@ -11,8 +11,9 @@
         Error err           = {.message = "", .code = 0};                                          \
         ok.ret_##suffix     = value;                                                               \
         Result_##suffix res = {                                                                    \
-            .ok  = ok,                                                                             \
-            .err = err,                                                                            \
+            .is_err = false,                                                                       \
+            .ok     = ok,                                                                          \
+            .err    = err,                                                                         \
         };                                                                                         \
         return res;                                                                                \
     }                                                                                              \
@@ -21,13 +22,13 @@
         ReturnValue ok;                                                                            \
         Error err                 = {.message = message, .code = code};                            \
         ok.ret_void_p             = NULL;                                                          \
-        Result_##suffix ret_value = {.err = err, .ok = ok};                                        \
+        Result_##suffix ret_value = {.is_err = true, .err = err, .ok = ok};                        \
         return ret_value;                                                                          \
     }                                                                                              \
                                                                                                    \
     ret_type unwrap_##suffix(Result_##suffix ret_value)                                            \
     {                                                                                              \
-        if (ret_value.err.code)                                                                    \
+        if (ret_value.is_err)                                                                      \
         {                                                                                          \
             fprintf(stderr, "Panic! Trying to unwrap an error.");                                  \
             exit(1);                                                                               \
@@ -37,7 +38,7 @@
                                                                                                    \
     Error unwrap_err_##suffix(Result_##suffix value)                                               \
     {                                                                                              \
-        if (value.err.code == 0)                                                                   \
+        if (!value.is_err)                                                                         \
         {                                                                                          \
             fprintf(stderr, "Panic! Trying to unwrap the error from a valid result");              \
             exit(1);                                                                               \

@@ -25,6 +25,7 @@ typedef struct
 #define RESULT_TYPE_h(suffix, ret_type)                                                            \
     typedef struct                                                                                 \
     {                                                                                              \
+        bool is_err;                                                                               \
         Error err;                                                                                 \
         ReturnValue ok;                                                                            \
     } Result_##suffix;                                                                             \
