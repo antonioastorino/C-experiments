@@ -10,9 +10,10 @@ typedef struct json_value JsonValue;
 
 typedef enum
 {
+    UNDEFINED,
     INT,
     FLOAT,
-    C_STR,
+    STR,
     JSON_ITEM,
     INVALID,
 } ValueType;
@@ -68,7 +69,19 @@ void JsonObj_destroy(JsonObj*);
 
 void JsonObj_get_tokens(String*);
 
-const char* get_value_char_p(const JsonItem*, const char*);
-JsonItem* get_value_item_p(const JsonItem*, const char*);
+#define GET_VALUE_h(suffix, out_type)                                                              \
+    void get_value_##suffix(const JsonItem*, const char*, out_type);
 
+GET_VALUE_h(STR, const char**);
+GET_VALUE_h(INT, int*);
+GET_VALUE_h(JSON_ITEM, JsonItem**);
+
+// clang-format off
+#define JsonItem_get(json_item_p, key, out_p)                      \
+    _Generic(out_p,                                                \
+        const char** : get_value_STR,        \
+        int* : get_value_INT, \
+        JsonItem** : get_value_JSON_ITEM \
+        )(json_item_p, key, out_p)
+// clang-format on
 #endif

@@ -2,12 +2,12 @@
 #define ASSERT_EQ(value_1, value_2, message)                                                       \
     if (value_1 == value_2)                                                                        \
     {                                                                                              \
-        printf("\n> \e[32mOk\e[0m\t %s\n", message);                                               \
+        printf("\n> \e[32mPASS\e[0m\t %s\n", message);                                             \
     }                                                                                              \
     else                                                                                           \
     {                                                                                              \
-        fprintf(stderr, "\n> \e[31mErr - Test failed.\e[0m\n%s:%d : left != right\n", __FILE__,    \
-                __LINE__);                                                                         \
+        printf("\n> \e[31mFAIL\e[0m\t %s\n", message);                                             \
+        fprintf(stderr, "\n> Err - Test failed.\n%s:%d : left != right\n", __FILE__, __LINE__);    \
     }
 
 #define PRINT_BANNER(title)                                                                        \

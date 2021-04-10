@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     // test_fs_utils();
     // test_logger();
     // test_class_string();
-    test_converter();
+    // test_converter();
     test_class_json();
 #else
     printf("Run 'bin/build-run.sh test' to run the unit tests\n");

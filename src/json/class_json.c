@@ -1,4 +1,5 @@
 #include "class_json.h"
+#include "converter.h"
 #include <stdio.h>
 #include <stdlib.h> // contains free()
 #include <string.h>
@@ -24,15 +25,20 @@ void skip_to_next(char* location_p /* start location in the haystack */,
     return;
 }
 
-ValueType get_value_type(char* initial_char_p)
+int get_value_type(char* initial_char_p)
 {
     if (((initial_char_p[0] == '{') || (initial_char_p[0] == ',')) && (initial_char_p[1] == '"'))
-        return JSON_ITEM;
+    {
+        return 1;
+    }
     else if (initial_char_p[0] == '"')
-        return C_STR;
+    {
+        return 2;
+    }
     else
-        printf("GOT: '%c%c'", initial_char_p[0], initial_char_p[1]);
-    return INVALID;
+    {
+        return 3;
+    }
 }
 
 // bool validate_tokens_str(const char* tokens_str_p) { while () }
@@ -148,7 +154,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
 {
     JsonObj* json_obj_p       = (JsonObj*)malloc(sizeof(JsonObj));
     json_obj_p->json_string_p = strip_whitespace(unwrap(String_clone(json_string_p)));
-    printf("%s\n", json_obj_p->json_string_p->str);
+    printf(" %s\n", (json_obj_p->json_string_p->str));
     if ((json_obj_p->json_string_p->str[0]
          != '{') /*&& (json_obj_p->json_string_p->str[0] != '[')*/)
     {
@@ -158,49 +164,62 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
         return Err(json_obj_p, "Invalid JSON string.", -1);
     }
 
-    char* curr_pos      = json_obj_p->json_string_p->str; // position analyzed (iterator)
-    JsonItem* curr_item = NULL;
+    char* curr_pos_p      = json_obj_p->json_string_p->str; // position analyzed (iterator)
+    JsonItem* curr_item_p = NULL;
 
     printf("\n\nStarting\n\n");
-    while ((curr_pos[0] != '\0') && (curr_pos[1] != '\0'))
+    while ((curr_pos_p[0] != '\0') && (curr_pos_p[1] != '\0'))
     {
-        if (curr_pos[0] == '}')
+        if (curr_pos_p[0] == '}')
         {
             // Object ends
-            curr_pos++;
+            printf("Object end, go to parent\n");
+            curr_item_p = curr_item_p->parent;
+            curr_pos_p++;
             // Use continue to make sure the next 2 chars are checked.
             continue;
         }
-        switch (get_value_type(curr_pos))
+        switch (get_value_type(curr_pos_p))
         {
-        case INT:
-            curr_pos++;
-            printf("got int ---------------\n");
-            /* code */
+        case 3:
+            printf("got number ---------------\n");
+
+            // Try to convert into an integer
+            char int_buff[23];
+            for (size_t i = 0;
+                 (i < 22) && (*curr_pos_p != ',') && (*curr_pos_p != '}') && (*curr_pos_p != ']');
+                 i++)
+            {
+                int_buff[i] = *curr_pos_p;
+                curr_pos_p++;
+                int_buff[i + 1]       = '\0';
+                Result_int parsed_int = str_to_int(int_buff);
+                if (!parsed_int.is_err)
+                {
+                    curr_item_p->value->value_type = INT;
+                    curr_item_p->value->value_int  = unwrap(parsed_int);
+                }
+            }
             break;
-        case FLOAT:
-            curr_pos++;
-            /* code */
+        case 2:
+            curr_item_p->value->value_type   = STR;
+            curr_item_p->value->value_char_p = curr_pos_p + 1; // Point after the quote
+            curr_pos_p                       = terminate_str(curr_pos_p);
+            printf("Got string:\t%s\n", curr_item_p->value->value_char_p);
+            printf("Remaining string: %s\n", curr_pos_p);
             break;
-        case C_STR:
-            curr_item->value->value_type   = C_STR;
-            curr_item->value->value_char_p = curr_pos + 1; // Point after the quote
-            curr_pos                       = terminate_str(curr_pos);
-            printf("Got string:\t%s\n", curr_item->value->value_char_p);
-            printf("Remaining string: %s\n", curr_pos);
-            break;
-        case JSON_ITEM:
+        case 1:
             printf("Got item \n");
             // Create a child
             JsonItem* new_item     = (JsonItem*)malloc(sizeof(JsonItem));
             new_item->value        = (JsonValue*)malloc(sizeof(JsonValue));
             new_item->next_sibling = NULL;
 
-            if (*curr_pos == '{')
+            if (*curr_pos_p == '{')
             {
                 // It's a child
                 printf("Found item\n");
-                if (curr_item == NULL)
+                if (curr_item_p == NULL)
                 {
                     // This is the root - create it instead of adding a child.
                     printf("Creating root.\n");
@@ -208,31 +227,31 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
                 }
                 else
                 {
-                    new_item->parent             = curr_item;
-                    curr_item->value->child_p    = new_item;
-                    curr_item->value->value_type = JSON_ITEM;
+                    new_item->parent               = curr_item_p;
+                    curr_item_p->value->child_p    = new_item;
+                    curr_item_p->value->value_type = JSON_ITEM;
                 }
             }
-            else if (*curr_pos == ',')
+            else if (*curr_pos_p == ',')
             {
                 // It's a sibling - the parent must be in common.
                 printf("Found sibling\n");
-                curr_item->next_sibling = new_item;
-                new_item->parent        = curr_item->parent;
+                curr_item_p->next_sibling = new_item;
+                new_item->parent          = curr_item_p->parent;
             }
             // Extract the key for the new item.
-            curr_item        = new_item;
-            curr_pos         = curr_pos + 2; // That's where the key starts
-            curr_item->key_p = curr_pos;
-            curr_pos         = terminate_str(curr_pos); // We should be at ':' now.
-            if (*curr_pos != ':')
+            curr_item_p        = new_item;
+            curr_pos_p         = curr_pos_p + 2; // That's where the key starts
+            curr_item_p->key_p = curr_pos_p;
+            curr_pos_p         = terminate_str(curr_pos_p); // We should be at ':' now.
+            if (*curr_pos_p != ':')
             {
                 printf("something bad happened\n");
                 exit(4);
             }
-            curr_pos++; // Skip the ':'.
-            printf("Got key:\t%s\n", curr_item->key_p);
-            printf("Remaining string: %s\n", curr_pos);
+            curr_pos_p++; // Skip the ':'.
+            printf("Got key:\t%s\n", curr_item_p->key_p);
+            printf("Remaining string: %s\n", curr_pos_p);
             break;
         case INVALID:
             printf("To be handled\n");
@@ -243,68 +262,46 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
         }
     }
     printf("\n\ndone\n");
-    // json_obj_p->tokens_string_p = generate_tokens(json_obj_p->json_string_p);
-    // if (!validate_json_tokens_string(tokens_string_p))
-    // {
-    //     // TODO: create error codes.
-    //     return Err(JsonOjb*, "Invalid JSON", -1);
-    // }
+
     return Ok(json_obj_p);
 }
 
 void JsonObj_destroy(JsonObj* json_obj_p)
 {
-    free(json_obj_p->json_string_p);
+    free((void*)json_obj_p->json_string_p);
     json_obj_p->json_string_p = NULL;
     //	TODO: Free all children and siblings.
     free(json_obj_p);
     json_obj_p = NULL;
 }
 
-const char* get_value_char_p(const JsonItem* item, const char* key)
-{
-    if (item == NULL)
-        return NULL;
-    if (!strcmp(item->key_p, key))
-    {
-        // The key matches
-        if (item->value->value_type == C_STR)
-        {
+#define GET_VALUE_c(suffix, out_type)                                                              \
+    void get_value_##suffix(const JsonItem* item, const char* key, out_type out_value)             \
+    {                                                                                              \
+        if (item == NULL)                                                                          \
+        {                                                                                          \
+            *out_value = NULL;                                                                     \
+            return;                                                                                \
+        }                                                                                          \
+        if (!strcmp(item->key_p, key))                                                             \
+        {                                                                                          \
+            /* The key matches */                                                                  \
+            if (item->value->value_type == suffix)                                                 \
+            {                                                                                      \
+                *out_value = item->value->child_p;                                                 \
+                return;                                                                            \
+            }                                                                                      \
+            else                                                                                   \
+            {                                                                                      \
+                exit(6);                                                                           \
+            }                                                                                      \
+        }                                                                                          \
+        else                                                                                       \
+        {                                                                                          \
+            /* Try another sibling */                                                              \
+            return get_value_##suffix(item->next_sibling, key, out_value);                         \
+        }                                                                                          \
+    }
 
-            return item->value->value_char_p;
-        }
-        else
-        {
-            exit(6);
-        }
-    }
-    else
-    {
-        // Try another key
-        return get_value_char_p(item->next_sibling, key);
-    }
-}
-
-JsonItem* get_value_item_p(const JsonItem* item, const char* key)
-{
-    if (item == NULL)
-        return NULL;
-    if (!strcmp(item->key_p, key))
-    {
-        // The key matches
-        if (item->value->value_type == JSON_ITEM)
-        {
-
-            return item->value->child_p;
-        }
-        else
-        {
-            exit(6);
-        }
-    }
-    else
-    {
-        // Try another key
-        return get_value_item_p(item->next_sibling, key);
-    }
-}
+GET_VALUE_c(STR, const char**) GET_VALUE_c(INT, int*);
+GET_VALUE_c(JSON_ITEM, JsonItem**);

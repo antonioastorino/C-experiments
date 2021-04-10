@@ -1,12 +1,15 @@
 {
 	"text_key": "text_value",
-	"text_sibling": "sibling_value",
-	"nested": {
-		"object_a": "item_a",
-		"object_b": "item_b"
+	"nested_1": {
+		"object_1.1": "item_1.1",
+		"object_1.2": "item_1.2"
 	},
-	"nested2": {
-		"object_1": "item_1",
-		"object_2": "item_2"
-	}
+	"nested_2": {
+		"object_2.1": "item_2.1",
+		"object_2.2": {
+			"item_2.2": "value_2.2.1"
+		}
+	},
+	"test_integer": 435234,
+	"text_sibling": "sibling_value"
 }
