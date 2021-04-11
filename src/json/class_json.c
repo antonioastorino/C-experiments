@@ -50,7 +50,7 @@ int get_value_type(char* initial_char_p)
 }
 
 // bool validate_tokens_str(const char* tokens_str_p) { while () }
-String* strip_whitespace(String* json_string_p)
+String* strip_whitespace(const String* json_string_p)
 {
     String* ret_tokens_string_p;
     // The returned string cannot be longer than the input string (plus an termination char).
@@ -306,7 +306,7 @@ void JsonObj_destroy(JsonObj* json_obj_p)
     {
         JsonItem_destroy(json_obj_p->root_p);
     }
-    String_destroy(json_obj_p->json_string_p);
+    String_destroy((String*)json_obj_p->json_string_p);
     FREE(json_obj_p);
     json_obj_p = NULL;
 }

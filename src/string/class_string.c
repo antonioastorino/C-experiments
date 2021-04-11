@@ -33,7 +33,7 @@ Result_String_p String_new(const char* format, ...)
     size_t allocated_size = (size_t)(actual_size * SIZE_FACTOR);
     // printf("Allocated size: %zu\n", allocated_size);
     tmp_str_p = (char*)REALLOCF(tmp_str_p, sizeof(char) * allocated_size);
-    LOG(TRACE, "Created %s.", tmp_str_p)
+    LOG(TRACE, "Created string.")
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
     out_string_obj_p         = (String*)MALLOC(sizeof(char*) + 2 * sizeof(size_t));

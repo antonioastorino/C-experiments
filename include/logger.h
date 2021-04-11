@@ -2,7 +2,8 @@
 #define LOGGER_H
 #include "class_string.h"
 // This is where the logging level is selected.
-#define LOG_LEVEL 5
+#define LOG_LEVEL 1
+#define MEM_ANALYSIS 1
 
 #define LOG_OUT stdout
 #define LOG_ERR stdout
