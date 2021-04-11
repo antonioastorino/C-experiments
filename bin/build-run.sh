@@ -3,6 +3,13 @@ BASE_DIR="$(dirname $0)/.."
 
 LOG_FILE_ERR="${BASE_DIR}/test/test-err.log"
 LOG_FILE_OUT="${BASE_DIR}/test/test-out.log"
+COMMON_HEADER="${BASE_DIR}/include/common.h"
+
+if ! [ -f "${COMMON_HEADER}" ]; then
+    echo "Common header file '${COMMON_HEADER}' missing"
+    exit 1
+fi
+
 if [ "$1" = "test" ]; then
     MODE="test"
 elif [ "$1" = "debug" ]; then
@@ -40,15 +47,15 @@ if [ "${MODE}" = "test" ] || [ "${MODE}" = "debug" ]; then
     touch test/artifacts/non-empty/inner/file.txt
     touch test/artifacts/non-empty/inner/inner_l2/file.txt
     touch test/artifacts/delete_me.txt
-
-    sed -i.bak 's/^#define TEST 0/#define TEST 1/' "include/common.h"
-    sed -i.bak 's/^#define MEM_ANALYSIS 0/#define MEM_ANALYSIS 1/' "include/common.h"
-    sed -i.bak 's/^#define LOG_LEVEL 0/#define LOG_LEVEL 1/' "include/common.h"
-
+    [ $(grep -c "^#define TEST 0" "${COMMON_HEADER}") -eq 1 ] && make clean
+    sed -i.bak 's/^#define TEST 0/#define TEST 1/' "${COMMON_HEADER}"
+    sed -i.bak 's/^#define MEM_ANALYSIS 0/#define MEM_ANALYSIS 1/' "${COMMON_HEADER}"
+    sed -i.bak 's/^#define LOG_LEVEL 0/#define LOG_LEVEL 1/' "${COMMON_HEADER}"
 else
-    sed -i.bak 's/^#define TEST 1/#define TEST 0/' "include/common.h"
-    sed -i.bak 's/^#define MEM_ANALYSIS 1/#define MEM_ANALYSIS 0/' "include/common.h"
-    sed -i.bak 's/^#define LOG_LEVEL 1/#define LOG_LEVEL 0/' "include/common.h"
+    [ $(grep -c "^#define TEST 1" "${COMMON_HEADER}") -eq 1 ] && make clean
+    sed -i.bak 's/^#define TEST 1/#define TEST 0/' "${COMMON_HEADER}"
+    sed -i.bak 's/^#define MEM_ANALYSIS 1/#define MEM_ANALYSIS 0/' "${COMMON_HEADER}"
+    sed -i.bak 's/^#define LOG_LEVEL 1/#define LOG_LEVEL 0/' "${COMMON_HEADER}"
 fi
 /bin/rm -f *.bak
 echo -e "\n\n --- Building and running ${MODE} --- \n\n"
