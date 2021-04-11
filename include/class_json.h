@@ -74,6 +74,7 @@ void JsonObj_get_tokens(String*);
 
 GET_VALUE_h(value_char_p, const char**);
 GET_VALUE_h(value_int, int*);
+GET_VALUE_h(value_float, float*);
 GET_VALUE_h(value_child_p, JsonItem**);
 
 // clang-format off
@@ -81,6 +82,7 @@ GET_VALUE_h(value_child_p, JsonItem**);
     _Generic(out_p,                                              \
         const char** : get_value_char_p,                         \
         int* : get_value_int,                                    \
+        float* : get_value_float,                                \
         JsonItem** : get_value_child_p                           \
         )(json_item_p, key, out_p)
 // clang-format on

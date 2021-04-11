@@ -20,10 +20,10 @@ int main(int argc, char** argv)
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
 #if TEST == 1
-    test_fs_utils();
-    test_logger();
-    test_class_string();
-    test_converter();
+    // test_fs_utils();
+    // test_logger();
+    // test_class_string();
+    // test_converter();
     test_class_json();
 
 #else

@@ -189,16 +189,38 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
         {
         case NUMBER:
         {
-            char int_buff[23];
-            // Try to convert into an integer
-            for (size_t i = 0;
-                 (i < 22) && (*curr_pos_p != ',') && (*curr_pos_p != '}') && (*curr_pos_p != ']');
+            // 23 digits should be sufficient.
+            const size_t max_num_len = 23;
+            char num_buff[max_num_len];
+            // Try to convert into an integer or a float, depending on the presence of a dot ('.').
+            bool dot_found = false;
+            size_t i       = 0;
+            // Create a substring containing the number.
+            for (; (i < max_num_len - 1) && (*curr_pos_p != ',') && (*curr_pos_p != '}')
+                   && (*curr_pos_p != ']');
                  i++)
             {
-                int_buff[i] = *curr_pos_p;
+                if (*curr_pos_p == '.')
+                {
+                    dot_found = true;
+                }
+                num_buff[i] = *curr_pos_p;
                 curr_pos_p++;
-                int_buff[i + 1]       = '\0';
-                Result_int parsed_int = str_to_int(int_buff);
+            }
+            // Null terminate the string.
+            num_buff[i + 1] = '\0';
+            if (dot_found)
+            {
+                Result_float parsed_float = str_to_float(num_buff);
+                if (!parsed_float.is_err)
+                {
+                    curr_item_p->value->value_type  = FLOAT;
+                    curr_item_p->value->value_float = unwrap(parsed_float);
+                }
+            }
+            else
+            {
+                Result_int parsed_int = str_to_int(num_buff);
                 if (!parsed_int.is_err)
                 {
                     curr_item_p->value->value_type = INT;
@@ -335,6 +357,7 @@ void get_value_char_p(const JsonItem* item, const char* key, const char** out_va
         return get_value_char_p(item->next_sibling, key, out_value);
     }
 };
+
 void get_value_int(const JsonItem* item, const char* key, int* out_value)
 {
     if (item == NULL)
@@ -357,6 +380,30 @@ void get_value_int(const JsonItem* item, const char* key, int* out_value)
     else
     {
         return get_value_int(item->next_sibling, key, out_value);
+    }
+};
+void get_value_float(const JsonItem* item, const char* key, float* out_value)
+{
+    if (item == NULL)
+    {
+        *out_value = 0.0f;
+        return;
+    }
+    if (!strcmp(item->key_p, key))
+    {
+        if (item->value->value_type == FLOAT)
+        {
+            *out_value = item->value->value_float;
+            return;
+        }
+        else
+        {
+            exit(6);
+        }
+    }
+    else
+    {
+        return get_value_float(item->next_sibling, key, out_value);
     }
 };
 

@@ -11,5 +11,6 @@
 		}
 	},
 	"test_integer": 435234,
+	"test_float": 435.234,
 	"text_sibling": "sibling_value"
 }

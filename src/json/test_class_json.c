@@ -51,6 +51,7 @@ void test_class_json()
     JsonItem* json_item;           // Hold objects of type JsonItem.
     const char* value_str;         // Hold objects of type string.
     int value_int;                 // Hold objects of type int.
+    float value_float;             // Hold objects of type float.
     JsonItem_get(json_obj_p->root_p, "text_key", &value_str);
     ASSERT_EQ(strcmp("text_value", value_str), 0, "String value found in first item");
 
@@ -82,6 +83,10 @@ void test_class_json()
     PRINT_TEST_TITLE("Test integer");
     JsonItem_get(json_obj_p->root_p, "test_integer", &value_int);
     ASSERT_EQ(value_int, 435234, "Integer found and read correctly");
+
+    PRINT_TEST_TITLE("Test float");
+    JsonItem_get(json_obj_p->root_p, "test_float", &value_float);
+    ASSERT_EQ(value_float, 435.234f, "Float found and read correctly");
 
     // String_println(json_obj_p->tokens_string_p);
     JsonObj_destroy(json_obj_p);
