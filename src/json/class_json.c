@@ -201,7 +201,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
                 Result_int parsed_int = str_to_int(int_buff);
                 if (!parsed_int.is_err)
                 {
-                    curr_item_p->value->value_type = value_int;
+                    curr_item_p->value->value_type = INT;
                     curr_item_p->value->value_int  = unwrap(parsed_int);
                 }
             }
@@ -209,7 +209,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
         }
         case STRING:
         {
-            curr_item_p->value->value_type   = value_char_p;
+            curr_item_p->value->value_type   = STR;
             curr_item_p->value->value_char_p = curr_pos_p + 1; // Point after the quote
             curr_pos_p                       = terminate_str(curr_pos_p);
             // printf("Got string:\t%s\n", curr_item_p->value->value_char_p);
@@ -236,7 +236,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
                 {
                     new_item->parent                  = curr_item_p;
                     curr_item_p->value->value_child_p = new_item;
-                    curr_item_p->value->value_type    = value_child_p;
+                    curr_item_p->value->value_type    = ITEM;
                 }
             }
             else if (*curr_pos_p == ',')
@@ -282,7 +282,7 @@ void JsonItem_destroy(JsonItem* json_item)
     {
         return;
     }
-    if (json_item->value->value_type == value_child_p)
+    if (json_item->value->value_type == ITEM)
     {
         JsonItem_destroy(json_item->value->value_child_p);
     }
@@ -311,34 +311,76 @@ void JsonObj_destroy(JsonObj* json_obj_p)
     json_obj_p = NULL;
 }
 
-#define GET_VALUE_c(suffix, out_type)                                                              \
-    void get_##suffix(const JsonItem* item, const char* key, out_type out_value)                   \
-    {                                                                                              \
-        if (item == NULL)                                                                          \
-        { /* TODO: when the out_type is pointer, we cannot assign its pointee to NULL */           \
-            *out_value = NULL;                                                                     \
-            return;                                                                                \
-        }                                                                                          \
-        if (!strcmp(item->key_p, key))                                                             \
-        {                                                                                          \
-            /* The key matches */                                                                  \
-            if (item->value->value_type == suffix)                                                 \
-            {                                                                                      \
-                *out_value = item->value->suffix;                                                  \
-                return;                                                                            \
-            }                                                                                      \
-            else                                                                                   \
-            {                                                                                      \
-                exit(6);                                                                           \
-            }                                                                                      \
-        }                                                                                          \
-        else                                                                                       \
-        {                                                                                          \
-            /* Try another sibling */                                                              \
-            return get_##suffix(item->next_sibling, key, out_value);                               \
-        }                                                                                          \
+void get_value_char_p(const JsonItem* item, const char* key, const char** out_value)
+{
+    if (item == NULL)
+    {
+        *out_value = NULL;
+        return;
     }
+    if (!strcmp(item->key_p, key))
+    {
+        if (item->value->value_type == STR)
+        {
+            *out_value = item->value->value_char_p;
+            return;
+        }
+        else
+        {
+            exit(6);
+        }
+    }
+    else
+    {
+        return get_value_char_p(item->next_sibling, key, out_value);
+    }
+};
+void get_value_int(const JsonItem* item, const char* key, int* out_value)
+{
+    if (item == NULL)
+    {
+        *out_value = 0;
+        return;
+    }
+    if (!strcmp(item->key_p, key))
+    {
+        if (item->value->value_type == INT)
+        {
+            *out_value = item->value->value_int;
+            return;
+        }
+        else
+        {
+            exit(6);
+        }
+    }
+    else
+    {
+        return get_value_int(item->next_sibling, key, out_value);
+    }
+};
 
-GET_VALUE_c(value_char_p, const char**);
-GET_VALUE_c(value_int, int*);
-GET_VALUE_c(value_child_p, JsonItem**);
+void get_value_child_p(const JsonItem* item, const char* key, JsonItem** out_value)
+{
+    if (item == NULL)
+    {
+        *out_value = NULL;
+        return;
+    }
+    if (!strcmp(item->key_p, key))
+    {
+        if (item->value->value_type == ITEM)
+        {
+            *out_value = item->value->value_child_p;
+            return;
+        }
+        else
+        {
+            exit(6);
+        }
+    }
+    else
+    {
+        return get_value_child_p(item->next_sibling, key, out_value);
+    }
+};

@@ -12,10 +12,10 @@ typedef struct json_value JsonValue;
 typedef enum
 {
     UNDEFINED,
-    value_int,
-    value_float,
-    value_char_p,
-    value_child_p,
+    INT,
+    FLOAT,
+    STR,
+    ITEM,
     INVALID,
 } ValueType;
 /**

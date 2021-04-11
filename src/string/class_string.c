@@ -12,7 +12,9 @@
 bool String_is_null(const String* string_obj_p)
 {
     if ((string_obj_p == NULL) || (string_obj_p->str == NULL))
+    {
         return true;
+    }
     return false;
 }
 
