@@ -16,7 +16,10 @@ void* custom_reallocf(void* ptr, size_t size, const char* file, const int line)
     void* new_ptr = reallocf(ptr, size);
     if (new_ptr != ptr)
     {
+        // Realloc, when creating a new pointer, frees the old one.
         printf("REALLOC_PTR: %p (%lu) - %s:%d\n", new_ptr, size, file, line);
+        printf("FREE_PTR: %p (%lu) - %s:%d\n", ptr, size, file, line);
+        ptr = NULL;
     }
     return new_ptr;
 }
