@@ -11,10 +11,10 @@ typedef struct json_value JsonValue;
 typedef enum
 {
     UNDEFINED,
-    INT,
-    FLOAT,
-    STR,
-    JSON_ITEM,
+    value_int,
+    value_float,
+    value_char_p,
+    value_child_p,
     INVALID,
 } ValueType;
 /**
@@ -42,11 +42,11 @@ typedef struct json_value
     ValueType value_type;
     union
     {
-        int value_int;             // leaf int
-        float value_float;         // leaf float
-        const char* value_char_p;  // leaf c-string
-        struct json_item* child_p; // another item
-                                   // TODO: add array
+        int value_int;                   // leaf int
+        float value_float;               // leaf float
+        const char* value_char_p;        // leaf c-string
+        struct json_item* value_child_p; // another item
+                                         // TODO: add array
     };
 } JsonValue;
 
@@ -69,19 +69,18 @@ void JsonObj_destroy(JsonObj*);
 
 void JsonObj_get_tokens(String*);
 
-#define GET_VALUE_h(suffix, out_type)                                                              \
-    void get_value_##suffix(const JsonItem*, const char*, out_type);
+#define GET_VALUE_h(suffix, out_type) void get_##suffix(const JsonItem*, const char*, out_type);
 
-GET_VALUE_h(STR, const char**);
-GET_VALUE_h(INT, int*);
-GET_VALUE_h(JSON_ITEM, JsonItem**);
+GET_VALUE_h(value_char_p, const char**);
+GET_VALUE_h(value_int, int*);
+GET_VALUE_h(value_child_p, JsonItem**);
 
 // clang-format off
-#define JsonItem_get(json_item_p, key, out_p)                      \
-    _Generic(out_p,                                                \
-        const char** : get_value_STR,        \
-        int* : get_value_INT, \
-        JsonItem** : get_value_JSON_ITEM \
+#define JsonItem_get(json_item_p, key, out_p)                    \
+    _Generic(out_p,                                              \
+        const char** : get_value_char_p,                         \
+        int* : get_value_int,                                    \
+        JsonItem** : get_value_child_p                           \
         )(json_item_p, key, out_p)
 // clang-format on
 #endif

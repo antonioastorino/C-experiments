@@ -1,5 +1,6 @@
 #include "class_json.h"
 #include "common.h"
+#include "mem.h"
 #include <stdio.h>
 
 void test_class_json()
@@ -10,7 +11,7 @@ void test_class_json()
     int c;
     size_t chars_read = 0;
     size_t size       = 4096;
-    char* buf         = malloc(size);
+    char* buf         = MALLOC(size);
     if (buf == NULL)
     {
         fprintf(stderr, "out of memory\n");
@@ -35,7 +36,7 @@ void test_class_json()
     buf[chars_read++] = '\0';
     fclose(json_file);
     String* json_string_p = unwrap(String_new(buf));
-    free(buf);
+    FREE(buf);
     buf = NULL;
 
     String_println(json_string_p);
@@ -43,11 +44,11 @@ void test_class_json()
     PRINT_TEST_TITLE("Root level");
 
     JsonObj* json_obj_p = unwrap(JsonObj_new_from_string_p(json_string_p));
-    String_destroy(json_string_p); // We can delete it.
 
-    JsonItem* json_item;   // Hold objects of type JsonItem.
-    const char* value_str; // Hold objects of type string.
-    int value_int;         // Hold objects of type int.
+    String_destroy(json_string_p); // We can delete it.
+    JsonItem* json_item;           // Hold objects of type JsonItem.
+    const char* value_str;         // Hold objects of type string.
+    int value_int;                 // Hold objects of type int.
     JsonItem_get(json_obj_p->root_p, "text_key", &value_str);
     ASSERT_EQ(strcmp("text_value", value_str), 0, "String value found in first item");
 

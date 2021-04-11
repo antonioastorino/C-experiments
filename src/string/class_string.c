@@ -1,5 +1,6 @@
 #include "class_string.h"
 #include "logger.h"
+#include "mem.h"
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -31,11 +32,11 @@ Result_String_p String_new(const char* format, ...)
     // Allocate twice the required length
     size_t allocated_size = (size_t)(actual_size * SIZE_FACTOR);
     // printf("Allocated size: %zu\n", allocated_size);
-    tmp_str_p = (char*)reallocf(tmp_str_p, sizeof(char) * allocated_size);
-    LOG(TRACE, "Created %s.", "string")
+    tmp_str_p = (char*)REALLOCF(tmp_str_p, sizeof(char) * allocated_size);
+    LOG(TRACE, "Created %s.", tmp_str_p)
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
-    out_string_obj_p         = (String*)malloc(sizeof(char*) + 2 * sizeof(size_t));
+    out_string_obj_p         = (String*)MALLOC(sizeof(char*) + 2 * sizeof(size_t));
     out_string_obj_p->str    = tmp_str_p;
     out_string_obj_p->length = actual_size;
     out_string_obj_p->size   = allocated_size;
@@ -65,22 +66,22 @@ Result_void_p String_renew(String* string_obj_p, const char* new_format, ...)
     {
         // Increase the allocated size.
         string_obj_p->size = (size_t)(new_len * SIZE_FACTOR);
-        string_obj_p->str  = (char*)reallocf(string_obj_p->str, sizeof(char) * string_obj_p->size);
+        string_obj_p->str  = (char*)REALLOCF(string_obj_p->str, sizeof(char) * string_obj_p->size);
     }
     string_obj_p->length = new_len;
     // Copy an extra byte for the NULL characther.
     strncpy(string_obj_p->str, tmp_str_p, new_len + 1);
-    free(tmp_str_p);
+    FREE(tmp_str_p);
     return Ok(NULL);
 }
 
 void String_destroy(String* string_obj_p)
 {
-    free(string_obj_p->str);
+    FREE(string_obj_p->str);
     string_obj_p->str    = NULL;
     string_obj_p->length = -1;
     string_obj_p->size   = -1;
-    free(string_obj_p);
+    FREE(string_obj_p);
     string_obj_p = NULL;
 }
 
