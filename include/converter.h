@@ -1,6 +1,7 @@
 #ifndef CONVERTER_H
 #define CONVERTER_H
 
+#include "common.h"
 #include "result.h"
 
 Result_int str_to_int(char* str_p);
