@@ -1,6 +1,7 @@
 #ifndef CLASS_JSON_H
 #define CLASS_JSON_H
 #include "class_string.h"
+#include "common.h"
 #include "result.h"
 
 // A air `key` `value`, plus a `parent` to make a double-linked list, and a `sibling`.
@@ -83,4 +84,8 @@ GET_VALUE_h(value_child_p, JsonItem**);
         JsonItem** : get_value_child_p                           \
         )(json_item_p, key, out_p)
 // clang-format on
+#endif
+
+#if TEST == 1
+void test_class_json(void);
 #endif

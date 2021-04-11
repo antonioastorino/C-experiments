@@ -1,8 +1,9 @@
 #include "mem.h"
+#include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
-#if MEM_ANALYSIS == 1
 
+#if MEM_ANALYSIS == 1
 void* custom_malloc(size_t size, const char* file, const int line)
 {
     void* ptr = malloc(size);
@@ -33,4 +34,5 @@ void custom_free(void* ptr, const char* file, const int line)
     free(ptr);
     printf("FREE_PTR: %p - %s:%d\n", ptr, file, line);
 }
+
 #endif

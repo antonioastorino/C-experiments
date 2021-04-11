@@ -41,14 +41,14 @@ if [ "${MODE}" = "test" ] || [ "${MODE}" = "debug" ]; then
     touch test/artifacts/non-empty/inner/inner_l2/file.txt
     touch test/artifacts/delete_me.txt
 
-    sed -i.bak 's/^#define TEST 0/#define TEST 1/' "src/main.c"
-    sed -i.bak 's/^#define MEM_ANALYSIS 0/#define MEM_ANALISYS 1/' "include/logger.h"
-    sed -i.bak 's/^#define LOG_LEVEL 0/#define LOG_LEVEL 1/' "include/logger.h"
+    sed -i.bak 's/^#define TEST 0/#define TEST 1/' "include/common.h"
+    sed -i.bak 's/^#define MEM_ANALYSIS 0/#define MEM_ANALYSIS 1/' "include/common.h"
+    sed -i.bak 's/^#define LOG_LEVEL 0/#define LOG_LEVEL 1/' "include/common.h"
 
 else
-    sed -i.bak 's/^#define TEST 1/#define TEST 0/' "src/main.c"
-    sed -i.bak 's/^#define MEM_ANALYSIS 1/#define MEM_ANALISYS 0/' "include/logger.h"
-    sed -i.bak 's/^#define LOG_LEVEL 1/#define LOG_LEVEL 0/' "include/logger.h"
+    sed -i.bak 's/^#define TEST 1/#define TEST 0/' "include/common.h"
+    sed -i.bak 's/^#define MEM_ANALYSIS 1/#define MEM_ANALYSIS 0/' "include/common.h"
+    sed -i.bak 's/^#define LOG_LEVEL 1/#define LOG_LEVEL 0/' "include/common.h"
 fi
 /bin/rm -f *.bak
 echo -e "\n\n --- Building and running ${MODE} --- \n\n"

@@ -1,5 +1,6 @@
 #ifndef MY_STRING_H
 #define MY_STRING_H
+#include "common.h"
 #include "result.h"
 #include <stdbool.h>
 #include <sys/types.h>
@@ -31,5 +32,9 @@ bool String_starts_with(String*, const char*);
 // Replace the internal string and reallocate memory if necessary.
 Result_void_p String_renew(String*, const char*, ...);
 Result_void_p String_replace_char(String*, const char, const char);
+
+#if TEST == 1
+void test_class_string(void);
+#endif
 
 #endif

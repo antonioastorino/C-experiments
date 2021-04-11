@@ -1,9 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 #include "class_string.h"
-// This is where the logging level is selected.
-#define LOG_LEVEL 1
-#define MEM_ANALYSIS 1
+#include "common.h"
 
 #define LOG_OUT stdout
 #define LOG_ERR stdout
@@ -21,14 +19,18 @@
 #define LOG_LEVEL_WARN 2
 #define LOG_LEVEL_ERROR 1
 
-void get_datetime(char[], size_t);
-
 #define LOG(level, args...)                                                                        \
     if (LOG_LEVEL >= LOG_LEVEL_##level)                                                            \
     {                                                                                              \
         const size_t buf_len = 25;                                                                 \
         char datetime[buf_len];                                                                    \
-        get_datetime(datetime, buf_len);                                                           \
+        time_t now     = time(&now);                                                               \
+        struct tm* ptm = gmtime(&now);                                                             \
+        if ((ptm == NULL) || (now == -1))                                                          \
+        {                                                                                          \
+            datetime[0] = 0;                                                                       \
+        }                                                                                          \
+        strftime(datetime, buf_len, "%Y %b %d %X", ptm);                                           \
         char log_message[1024];                                                                    \
         if (snprintf(log_message, 1024, args) > 1023)                                              \
         {                                                                                          \
@@ -49,5 +51,9 @@ void get_datetime(char[], size_t);
     else                                                                                           \
     {                                                                                              \
     }
+
+#if TEST == 1
+void test_logger(void);
+#endif
 
 #endif

@@ -1,5 +1,8 @@
 //  Created by Antonio Astorino on 27/03/2021.
-
+#include "class_json.h"
+#include "class_string.h"
+#include "common.h"
+#include "converter.h"
 #include "fs_utils.h"
 #include "logger.h"
 #include "result.h"
@@ -7,15 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define TEST 1
-
-#if TEST
-#include "../test/test_class_json.c"
-#include "../test/test_class_string.c"
-#include "../test/test_converter.c"
-#include "../test/test_fs_utils.c"
-#include "../test/test_logger.c"
-#endif
 
 int main(int argc, char** argv)
 {
@@ -26,7 +20,7 @@ int main(int argc, char** argv)
     printf("Hello from `main`\n");
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
-#if TEST
+#if TEST == 1
     test_fs_utils();
     test_logger();
     test_class_string();

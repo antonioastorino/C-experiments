@@ -1,6 +1,8 @@
-#include "common.h"
 #include "logger.h"
+#include <stdarg.h>
+#include <stdio.h>
 
+#if TEST == 1
 void test_logger()
 {
     PRINT_BANNER("Logger")
@@ -28,3 +30,4 @@ void test_logger()
         "Text too long - Text too long - Text too long - Text too long - ")
     printf("All good.\n");
 }
+#endif

@@ -33,7 +33,10 @@
 		"cstdlib": "c",
 		"optional": "c",
 		"thread": "c",
-		"iterator": "cpp"
+		"iterator": "cpp",
+		"common.h": "c",
+		"logger.h": "c",
+		"fs_utils.h": "c"
 	},
 	"cSpell.words": [
 		"println"

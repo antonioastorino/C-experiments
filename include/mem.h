@@ -17,10 +17,10 @@ void custom_free(void*, const char*, const int);
 
 #else
 
-#define MALLOC(size) malloc(size);
-#define REALLOCF(ptr, size) reallocf(ptr, size);
-#define VASPRINTF(ptr_p, format, args) vasprintf(ptr_p, size, args);
-#define FREE(ptr) free(ptr);
+#define MALLOC(size) malloc(size)
+#define REALLOCF(ptr, size) reallocf(ptr, size)
+#define VASPRINTF(ptr_p, format, args) vasprintf(ptr_p, format, args)
+#define FREE(ptr) free(ptr)
 
 #endif
 
