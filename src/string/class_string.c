@@ -23,7 +23,7 @@ Result_String_p String_new(const char* format, ...)
     String* out_string_obj_p;
     va_start(args, format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
-    if (vasprintf(&tmp_str_p, format, args) == -1)
+    if (VASPRINTF(&tmp_str_p, format, args) == -1)
     {
         LOG(ERROR, "Something went wrong with vasprintf - errno: %d", errno)
         return Err(out_string_obj_p, "Failed to create string.", errno);
@@ -36,7 +36,7 @@ Result_String_p String_new(const char* format, ...)
     LOG(TRACE, "Created string.")
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
-    out_string_obj_p         = (String*)MALLOC(sizeof(char*) + 2 * sizeof(size_t));
+    out_string_obj_p         = (String*)MALLOC(sizeof(String));
     out_string_obj_p->str    = tmp_str_p;
     out_string_obj_p->length = actual_size;
     out_string_obj_p->size   = allocated_size;
@@ -55,7 +55,7 @@ Result_void_p String_renew(String* string_obj_p, const char* new_format, ...)
     char* tmp_str_p = NULL;
     va_start(args, new_format);
     // Calculate how many bytes are needed (excluding the terminating '\0').
-    if (vasprintf(&tmp_str_p, new_format, args) == -1)
+    if (VASPRINTF(&tmp_str_p, new_format, args) == -1)
     {
         return Err(NULL, "Failed to parse format.", errno);
     }
@@ -81,6 +81,7 @@ void String_destroy(String* string_obj_p)
     string_obj_p->str    = NULL;
     string_obj_p->length = -1;
     string_obj_p->size   = -1;
+
     FREE(string_obj_p);
     string_obj_p = NULL;
 }

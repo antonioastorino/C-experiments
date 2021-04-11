@@ -6,12 +6,12 @@
 
 typedef struct class_string
 {
-    // Array of chars whose allocated length >= `len`.
-    char* str;
     // Length that would be returned by `strlen(str)`.
     size_t length;
     // Allocated memory in number of chars.
     size_t size;
+    // Array of chars whose allocated length >= `len`.
+    char* str;
 } String;
 
 /**************************************** (De)Constructors ****************************************/

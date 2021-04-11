@@ -13,8 +13,19 @@ void* custom_malloc(size_t size, const char* file, const int line)
 void* custom_reallocf(void* ptr, size_t size, const char* file, const int line)
 {
     void* new_ptr = reallocf(ptr, size);
-    printf("REALLOC_PTR: %p (%lu) - %s:%d\n", new_ptr, size, file, line);
+    if (new_ptr != ptr)
+    {
+        printf("REALLOC_PTR: %p (%lu) - %s:%d\n", new_ptr, size, file, line);
+    }
     return new_ptr;
+}
+
+int custom_vasprintf(char** ptr_p, const char* format, va_list args, const char* file,
+                     const int line)
+{
+    int ret_val = vasprintf(ptr_p, format, args);
+    printf("ALLOC_PTR: %p (%d) - %s:%d\n", *ptr_p, ret_val, file, line);
+    return ret_val;
 }
 
 void custom_free(void* ptr, const char* file, const int line)
