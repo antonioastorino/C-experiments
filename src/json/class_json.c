@@ -357,7 +357,7 @@ void JsonItem_destroy(JsonItem* json_item)
     }
     if (json_item->value->value_type == VALUE_ARRAY)
     {
-        JsonItem_destroy(json_item->value->value_array_p->element_at_0);
+        JsonItem_destroy(json_item->value->value_array_p->element);
     }
     if (json_item->next_sibling != NULL)
     {
@@ -494,8 +494,8 @@ void get_value_array_p(const JsonItem* item, const char* key, JsonArray** out_va
     {
         if (item->value->value_type == VALUE_ARRAY)
         {
-            *out_value                 = item->value->value_array_p;
-            (*out_value)->element_at_0 = item->value->value_child_p;
+            *out_value            = item->value->value_array_p;
+            (*out_value)->element = item->value->value_child_p;
             return;
         }
         else
@@ -507,4 +507,116 @@ void get_value_array_p(const JsonItem* item, const char* key, JsonArray** out_va
     {
         return get_value_array_p(item->next_sibling, key, out_value);
     }
+};
+
+void get_array_value_char_p(const JsonArray* json_array, size_t index, const char** out_value)
+{
+    if (json_array == NULL)
+    {
+        *out_value = NULL;
+        return;
+    }
+    JsonItem* json_item = json_array->element;
+    while (true)
+    {
+        if (json_item->index == index)
+        {
+            break;
+        }
+        else if (json_item->next_sibling == NULL)
+        {
+            *out_value = NULL;
+            return;
+        }
+        json_item = json_item->next_sibling;
+    }
+    if (json_item->value->value_type != VALUE_STR)
+    {
+        exit(35);
+    }
+    *out_value = json_item->value->value_char_p;
+};
+
+void get_array_value_int(const JsonArray* json_array, size_t index, int* out_value)
+{
+    if (json_array == NULL)
+    {
+        *out_value = 0;
+        return;
+    }
+    JsonItem* json_item = json_array->element;
+    while (true)
+    {
+        if (json_item->index == index)
+        {
+            break;
+        }
+        else if (json_item->next_sibling == NULL)
+        {
+            *out_value = 0;
+            return;
+        }
+        json_item = json_item->next_sibling;
+    }
+    if (json_item->value->value_type != VALUE_INT)
+    {
+        exit(36);
+    }
+    *out_value = json_item->value->value_int;
+};
+
+void get_array_value_float(const JsonArray* json_array, size_t index, float* out_value)
+{
+    if (json_array == NULL)
+    {
+        *out_value = 0.0f;
+        return;
+    }
+    JsonItem* json_item = json_array->element;
+    while (true)
+    {
+        if (json_item->index == index)
+        {
+            break;
+        }
+        else if (json_item->next_sibling == NULL)
+        {
+            *out_value = 0.0f;
+            return;
+        }
+        json_item = json_item->next_sibling;
+    }
+    if (json_item->value->value_type != VALUE_FLOAT)
+    {
+        exit(37);
+    }
+    *out_value = json_item->value->value_float;
+};
+
+void get_array_value_child_p(const JsonArray* json_array, size_t index, JsonItem** out_value)
+{
+    if (json_array == NULL)
+    {
+        *out_value = NULL;
+        return;
+    }
+    JsonItem* json_item = json_array->element;
+    while (true)
+    {
+        if (json_item->index == index)
+        {
+            break;
+        }
+        else if (json_item->next_sibling == NULL)
+        {
+            *out_value = NULL;
+            return;
+        }
+        json_item = json_item->next_sibling;
+    }
+    if (json_item->value->value_type != VALUE_ITEM)
+    {
+        exit(35);
+    }
+    *out_value = json_item->value->value_child_p;
 };

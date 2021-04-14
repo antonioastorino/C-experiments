@@ -41,7 +41,7 @@ typedef enum
 
 typedef struct json_array
 {
-    struct json_item* element_at_0;
+    struct json_item* element;
 } JsonArray;
 
 typedef struct json_value
@@ -78,12 +78,18 @@ void JsonObj_destroy(JsonObj*);
 void JsonObj_get_tokens(String*);
 
 #define GET_VALUE_h(suffix, out_type) void get_##suffix(const JsonItem*, const char*, out_type);
-
 GET_VALUE_h(value_char_p, const char**);
 GET_VALUE_h(value_int, int*);
 GET_VALUE_h(value_float, float*);
 GET_VALUE_h(value_child_p, JsonItem**);
 GET_VALUE_h(value_array_p, JsonArray**);
+
+#define GET_ARRAY_VALUE_h(suffix, out_type)                                                        \
+    void get_array_##suffix(const JsonArray*, size_t index, out_type);
+GET_ARRAY_VALUE_h(value_char_p, const char**);
+GET_ARRAY_VALUE_h(value_int, int*);
+GET_ARRAY_VALUE_h(value_float, float*);
+GET_ARRAY_VALUE_h(value_child_p, JsonItem**);
 
 // clang-format off
 #define JsonItem_get(json_item_p, key, out_p)                    \
@@ -94,9 +100,16 @@ GET_VALUE_h(value_array_p, JsonArray**);
         JsonItem** : get_value_child_p,                          \
         JsonArray** : get_value_array_p                          \
         )(json_item_p, key, out_p)
+
+#define JsonArray_get(json_array_p, index, out_p)                \
+    _Generic(out_p,                                              \
+        const char** : get_array_value_char_p,                   \
+        int*         : get_array_value_int,                      \
+        float*       : get_array_value_float,                    \
+        JsonItem**   : get_array_value_child_p                   \
+        )(json_array_p, index, out_p)
 // clang-format on
 #endif
-
 #if TEST == 1
 void test_class_json(void);
 #endif

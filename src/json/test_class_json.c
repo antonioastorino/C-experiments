@@ -90,7 +90,8 @@ void test_class_json()
     ASSERT_EQ(value_float, 435.234f, "Float found and read correctly");
 
     JsonItem_get(json_obj_p->root_p, "test_array", &json_array);
-    // JsonArray_get(json_array, 2, value_int);
+    JsonArray_get(json_array, 2, &value_str);
+    printf("%s\n", value_str);
 
     JsonObj_destroy(json_obj_p);
 }

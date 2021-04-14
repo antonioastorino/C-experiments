@@ -6,7 +6,8 @@
 	},
 	"test_array": [
 		1,
-		2.15
+		2.15,
+		"string_element"
 	],
 	"nested_2": {
 		"object_2.1": "item_2.1",
