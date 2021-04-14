@@ -4,6 +4,10 @@
 		"object_1.1": "item_1.1",
 		"object_1.2": "item_1.2"
 	},
+	"test_array": [
+		1,
+		2.15
+	],
 	"nested_2": {
 		"object_2.1": "item_2.1",
 		"object_2.2": {

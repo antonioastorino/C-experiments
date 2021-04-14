@@ -10,6 +10,7 @@ typedef enum
     NUMBER,
     STRING,
     CHILD,
+    INVALID,
 } ElementType;
 
 bool is_token(const char c)
@@ -33,7 +34,7 @@ void skip_to_next(char* location_p /* start location in the haystack */,
     return;
 }
 
-int get_value_type(char* initial_char_p)
+ElementType get_value_type(char* initial_char_p)
 {
     if (((initial_char_p[0] == '{') || (initial_char_p[0] == ',')) && (initial_char_p[1] == '"'))
     {
@@ -173,6 +174,8 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
 
     char* curr_pos_p      = json_obj_p->json_string_p->str; // position analyzed (iterator)
     JsonItem* curr_item_p = NULL;
+    bool in_array         = false;
+    size_t array_index    = 0;
 
     printf("\n\nStarting\n\n");
     while ((curr_pos_p[0] != '\0') && (curr_pos_p[1] != '\0'))
@@ -184,6 +187,50 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
             curr_pos_p++;
             // Use continue to make sure the next 2 chars are checked.
             continue;
+        }
+        if (curr_pos_p[0] == '[')
+        {
+            in_array = true;
+            curr_pos_p++;
+            continue;
+        }
+        else if (curr_pos_p[0] == ']')
+        {
+            // Array ends - go to parent
+            in_array    = false;
+            array_index = 0;
+            curr_item_p = curr_item_p->parent;
+            curr_pos_p++;
+            // Use continue to make sure the next 2 chars are checked.
+            continue;
+        }
+        if (in_array)
+        {
+            // Create an item at each iteration with NULL key and incrementing index.
+            JsonItem* new_item     = (JsonItem*)MALLOC(sizeof(JsonItem));
+            new_item->value        = (JsonValue*)MALLOC(sizeof(JsonValue));
+            new_item->next_sibling = NULL;
+            if (array_index == 0)
+            {
+                new_item->parent                  = curr_item_p;
+                curr_item_p->value->value_child_p = new_item;
+                curr_item_p->value->value_type    = VALUE_ARRAY;
+            }
+            else if (*curr_pos_p == ',')
+            {
+                // It's a sibling of the current item.
+                new_item->parent          = curr_item_p->parent;
+                curr_item_p->next_sibling = new_item;
+                curr_pos_p++;
+            }
+            else
+            {
+                JsonObj_destroy(json_obj_p);
+                return Err(json_obj_p, "Invalid array", 15);
+            }
+            new_item->index = array_index++;
+            new_item->key_p = NULL;
+            curr_item_p     = new_item;
         }
         switch (get_value_type(curr_pos_p))
         {
@@ -208,13 +255,13 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
                 curr_pos_p++;
             }
             // Null terminate the string.
-            num_buff[i + 1] = '\0';
+            num_buff[i] = '\0';
             if (dot_found)
             {
                 Result_float parsed_float = str_to_float(num_buff);
                 if (!parsed_float.is_err)
                 {
-                    curr_item_p->value->value_type  = FLOAT;
+                    curr_item_p->value->value_type  = VALUE_FLOAT;
                     curr_item_p->value->value_float = unwrap(parsed_float);
                 }
             }
@@ -223,7 +270,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
                 Result_int parsed_int = str_to_int(num_buff);
                 if (!parsed_int.is_err)
                 {
-                    curr_item_p->value->value_type = INT;
+                    curr_item_p->value->value_type = VALUE_INT;
                     curr_item_p->value->value_int  = unwrap(parsed_int);
                 }
             }
@@ -231,7 +278,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
         }
         case STRING:
         {
-            curr_item_p->value->value_type   = STR;
+            curr_item_p->value->value_type   = VALUE_STR;
             curr_item_p->value->value_char_p = curr_pos_p + 1; // Point after the quote
             curr_pos_p                       = terminate_str(curr_pos_p);
             // printf("Got string:\t%s\n", curr_item_p->value->value_char_p);
@@ -258,7 +305,7 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
                 {
                     new_item->parent                  = curr_item_p;
                     curr_item_p->value->value_child_p = new_item;
-                    curr_item_p->value->value_type    = ITEM;
+                    curr_item_p->value->value_type    = VALUE_ITEM;
                 }
             }
             else if (*curr_pos_p == ',')
@@ -304,9 +351,13 @@ void JsonItem_destroy(JsonItem* json_item)
     {
         return;
     }
-    if (json_item->value->value_type == ITEM)
+    if (json_item->value->value_type == VALUE_ITEM)
     {
         JsonItem_destroy(json_item->value->value_child_p);
+    }
+    if (json_item->value->value_type == VALUE_ARRAY)
+    {
+        JsonItem_destroy(json_item->value->value_array_p->element_at_0);
     }
     if (json_item->next_sibling != NULL)
     {
@@ -342,7 +393,7 @@ void get_value_char_p(const JsonItem* item, const char* key, const char** out_va
     }
     if (!strcmp(item->key_p, key))
     {
-        if (item->value->value_type == STR)
+        if (item->value->value_type == VALUE_STR)
         {
             *out_value = item->value->value_char_p;
             return;
@@ -367,7 +418,7 @@ void get_value_int(const JsonItem* item, const char* key, int* out_value)
     }
     if (!strcmp(item->key_p, key))
     {
-        if (item->value->value_type == INT)
+        if (item->value->value_type == VALUE_INT)
         {
             *out_value = item->value->value_int;
             return;
@@ -391,7 +442,7 @@ void get_value_float(const JsonItem* item, const char* key, float* out_value)
     }
     if (!strcmp(item->key_p, key))
     {
-        if (item->value->value_type == FLOAT)
+        if (item->value->value_type == VALUE_FLOAT)
         {
             *out_value = item->value->value_float;
             return;
@@ -416,7 +467,7 @@ void get_value_child_p(const JsonItem* item, const char* key, JsonItem** out_val
     }
     if (!strcmp(item->key_p, key))
     {
-        if (item->value->value_type == ITEM)
+        if (item->value->value_type == VALUE_ITEM)
         {
             *out_value = item->value->value_child_p;
             return;
@@ -429,5 +480,31 @@ void get_value_child_p(const JsonItem* item, const char* key, JsonItem** out_val
     else
     {
         return get_value_child_p(item->next_sibling, key, out_value);
+    }
+};
+
+void get_value_array_p(const JsonItem* item, const char* key, JsonArray** out_value)
+{
+    if (item == NULL)
+    {
+        *out_value = NULL;
+        return;
+    }
+    if (!strcmp(item->key_p, key))
+    {
+        if (item->value->value_type == VALUE_ARRAY)
+        {
+            *out_value                 = item->value->value_array_p;
+            (*out_value)->element_at_0 = item->value->value_child_p;
+            return;
+        }
+        else
+        {
+            exit(7);
+        }
+    }
+    else
+    {
+        return get_value_array_p(item->next_sibling, key, out_value);
     }
 };

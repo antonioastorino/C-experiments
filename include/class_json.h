@@ -11,12 +11,13 @@ typedef struct json_value JsonValue;
 
 typedef enum
 {
-    UNDEFINED,
-    INT,
-    FLOAT,
-    STR,
-    ITEM,
-    INVALID,
+    VALUE_UNDEFINED,
+    VALUE_INT,
+    VALUE_FLOAT,
+    VALUE_STR,
+    VALUE_ARRAY,
+    VALUE_ITEM,
+    VALUE_INVALID,
 } ValueType;
 /**
  *
@@ -38,22 +39,28 @@ typedef enum
  *     ] not followed by , or }
  */
 
+typedef struct json_array
+{
+    struct json_item* element_at_0;
+} JsonArray;
+
 typedef struct json_value
 {
     ValueType value_type;
     union
     {
-        int value_int;                   // leaf int
-        float value_float;               // leaf float
-        const char* value_char_p;        // leaf c-string
-        struct json_item* value_child_p; // another item
-                                         // TODO: add array
+        int value_int;                    // leaf int
+        float value_float;                // leaf float
+        const char* value_char_p;         // leaf c-string
+        struct json_item* value_child_p;  // another item
+        struct json_array* value_array_p; // the first item of an array
     };
 } JsonValue;
 
 typedef struct json_item
 {
     const char* key_p;
+    size_t index; // For arrays only
     JsonValue* value;
     struct json_item* parent;
     struct json_item* next_sibling;
@@ -76,6 +83,7 @@ GET_VALUE_h(value_char_p, const char**);
 GET_VALUE_h(value_int, int*);
 GET_VALUE_h(value_float, float*);
 GET_VALUE_h(value_child_p, JsonItem**);
+GET_VALUE_h(value_array_p, JsonArray**);
 
 // clang-format off
 #define JsonItem_get(json_item_p, key, out_p)                    \
@@ -83,7 +91,8 @@ GET_VALUE_h(value_child_p, JsonItem**);
         const char** : get_value_char_p,                         \
         int* : get_value_int,                                    \
         float* : get_value_float,                                \
-        JsonItem** : get_value_child_p                           \
+        JsonItem** : get_value_child_p,                          \
+        JsonArray** : get_value_array_p                          \
         )(json_item_p, key, out_p)
 // clang-format on
 #endif
