@@ -90,8 +90,13 @@ void test_class_json()
     ASSERT_EQ(value_float, 435.234f, "Float found and read correctly");
 
     JsonItem_get(json_obj_p->root_p, "test_array", &json_array);
+    JsonArray_get(json_array, 0, &value_int);
+    ASSERT_EQ(value_int, 14352, "Array element of type INT read correctly");
+    JsonArray_get(json_array, 1, &value_float);
+    ASSERT_EQ(value_float, 2.15f, "Array element of type FLOAT read correctly");
     JsonArray_get(json_array, 2, &value_str);
-    printf("%s\n", value_str);
+    ASSERT_EQ(strcmp(value_str, "string_element"), 0,
+              "Array element of type C-string read correctly");
 
     JsonObj_destroy(json_obj_p);
 }
