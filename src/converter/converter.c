@@ -1,4 +1,5 @@
 #include "converter.h"
+#include "common.h"
 #include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>

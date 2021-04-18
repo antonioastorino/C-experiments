@@ -1,5 +1,5 @@
 #include "class_string.h"
-#include "common.h"
+#include "logger.h"
 #include "mem.h"
 #include <errno.h>
 #include <stdarg.h>
@@ -27,7 +27,7 @@ Result_String_p String_new(const char* format, ...)
     // Calculate how many bytes are needed (excluding the terminating '\0').
     if (VASPRINTF(&tmp_str_p, format, args) == -1)
     {
-        LOG(ERROR, "Something went wrong with vasprintf - errno: %d", errno)
+        LOG_ERROR("Something went wrong with vasprintf - errno: %d", errno)
         return Err(out_string_obj_p, "Failed to create string.", errno);
     }
     size_t actual_size = strlen(tmp_str_p);
@@ -35,7 +35,7 @@ Result_String_p String_new(const char* format, ...)
     size_t allocated_size = (size_t)(actual_size * SIZE_FACTOR);
     // printf("Allocated size: %zu\n", allocated_size);
     tmp_str_p = (char*)REALLOCF(tmp_str_p, sizeof(char) * allocated_size);
-    LOG(TRACE, "Created string.")
+    LOG_TRACE("Created string.")
     va_end(args);
     // Set the `.len` parameter as the length of the string, excluding the terminating '\0'.
     out_string_obj_p         = (String*)MALLOC(sizeof(String));

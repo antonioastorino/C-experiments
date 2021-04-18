@@ -3,8 +3,8 @@
 #include "class_string.h"
 #include "common.h"
 
-#define LOG_OUT stdout
-#define LOG_ERR stdout
+#define LOG_OUT_FILE stdout
+#define LOG_ERR_FILE stdout
 
 #include <ctype.h>
 #include <string.h>
@@ -19,38 +19,80 @@
 #define LOG_LEVEL_WARN 2
 #define LOG_LEVEL_ERROR 1
 
-#define LOG(level, args...)                                                                        \
-    if (LOG_LEVEL >= LOG_LEVEL_##level)                                                            \
+void get_datetime(char*, const size_t);
+
+#define CHECK_LOG_LENGTH(args...)                                                                  \
+    char log_message[1024];                                                                        \
+    if (snprintf(log_message, 1024, args) > 1023)                                                  \
     {                                                                                              \
-        const size_t buf_len = 25;                                                                 \
-        char datetime[buf_len];                                                                    \
-        time_t now     = time(&now);                                                               \
-        struct tm* ptm = gmtime(&now);                                                             \
-        if ((ptm == NULL) || (now == -1))                                                          \
-        {                                                                                          \
-            datetime[0] = 0;                                                                       \
-        }                                                                                          \
-        strftime(datetime, buf_len, "%Y %b %d %X", ptm);                                           \
-        char log_message[1024];                                                                    \
-        if (snprintf(log_message, 1024, args) > 1023)                                              \
-        {                                                                                          \
-            fprintf(LOG_ERR, "WARN: the following log message is longer "                          \
-                             "that maximum allowed (1024 bytes).\n");                              \
-        }                                                                                          \
-        if ((#level[0] == 'W') || (#level[0] == 'E'))                                              \
-        {                                                                                          \
-            fprintf(LOG_ERR, "%s - " #level "- %s:%d - %s.\n", datetime, __FILENAME__, __LINE__,   \
-                    log_message);                                                                  \
-        }                                                                                          \
-        else                                                                                       \
-        {                                                                                          \
-            fprintf(LOG_OUT, "%s - " #level "- %s:%d - %s.\n", datetime, __FILENAME__, __LINE__,   \
-                    log_message);                                                                  \
-        }                                                                                          \
-    }                                                                                              \
-    else                                                                                           \
-    {                                                                                              \
+        fprintf(LOG_ERR_FILE, "WARN: the following log message is longer "                         \
+                              "that maximum allowed (1024 bytes).\n");                             \
     }
+
+#if LOG_LEVEL >= LOG_LEVEL_TRACE
+#define LOG_TRACE(args...)                                                                         \
+    {                                                                                              \
+        char datetime[25];                                                                         \
+        get_datetime(datetime, 25);                                                                \
+        CHECK_LOG_LENGTH(args)                                                                     \
+        fprintf(LOG_OUT_FILE, "%s - TRACE - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,       \
+                log_message);                                                                      \
+    }
+#else
+#define LOG_TRACE(args...)
+#endif
+
+#if LOG_LEVEL >= LOG_LEVEL_DEBUG
+#define LOG_DEBUG(args...)                                                                         \
+    {                                                                                              \
+        char datetime[25];                                                                         \
+        get_datetime(datetime, 25);                                                                \
+        CHECK_LOG_LENGTH(args)                                                                     \
+        fprintf(LOG_OUT_FILE, "%s - DEBUG - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,       \
+                log_message);                                                                      \
+    }
+#else
+#define LOG_DEBUG(args...)
+#endif
+
+#if LOG_LEVEL >= LOG_LEVEL_INFO
+#define LOG_INFO(args...)                                                                          \
+    {                                                                                              \
+        char datetime[25];                                                                         \
+        get_datetime(datetime, 25);                                                                \
+        CHECK_LOG_LENGTH(args)                                                                     \
+        fprintf(LOG_OUT_FILE, "%s - INFO - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,        \
+                log_message);                                                                      \
+    }
+#else
+#define LOG_INFO(args...)
+#endif
+
+#if LOG_LEVEL >= LOG_LEVEL_WARN
+#define LOG_WARN(args...)                                                                          \
+    {                                                                                              \
+        char datetime[25];                                                                         \
+        get_datetime(datetime, 25);                                                                \
+        CHECK_LOG_LENGTH(args)                                                                     \
+        fprintf(LOG_ERR_FILE, "%s - WARN - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,        \
+                log_message);                                                                      \
+    }
+#else
+#define LOG_WARN(args...)
+#endif
+
+#if LOG_LEVEL >= LOG_LEVEL_ERROR
+#define LOG_ERROR(args...)                                                                         \
+    {                                                                                              \
+        char datetime[25];                                                                         \
+        get_datetime(datetime, 25);                                                                \
+        CHECK_LOG_LENGTH(args)                                                                     \
+        fprintf(LOG_ERR_FILE, "%s - ERROR - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,       \
+                log_message);                                                                      \
+    }
+#else
+#define LOG_ERROR(args...)
+#endif
 
 #if TEST == 1
 void test_logger(void);

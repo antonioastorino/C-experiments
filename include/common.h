@@ -4,9 +4,10 @@
 #include <string.h>
 
 #define TEST 1
-#define LOG_LEVEL 1
+#define LOG_LEVEL 5
 #define MEM_ANALYSIS 1
 
+#if TEST
 #define ASSERT_EQ(value_1, value_2, message)                                                       \
     if (value_1 == value_2)                                                                        \
     {                                                                                              \
@@ -33,5 +34,5 @@
     size_t counter = 0;
 
 #define PRINT_TEST_TITLE(title) printf("\n------- T:%lu < %s > -------\n", ++counter, title);
-
+#endif
 #endif

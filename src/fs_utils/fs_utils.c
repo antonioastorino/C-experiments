@@ -1,5 +1,4 @@
 #include "fs_utils.h"
-#include "common.h"
 #include "logger.h"
 #include <errno.h>
 #include <fts.h>
@@ -32,14 +31,14 @@ Result_void_p fs_utils_mkdir(String* p_string_dir_path, mode_t permission)
     mode_t old_mask = umask(0);
     if (!fs_utils_does_exist(p_string_dir_path))
     {
-        LOG(TRACE, "Trying to create %s", p_string_dir_path->str);
+        LOG_TRACE("Trying to create %s", p_string_dir_path->str);
         if (mkdir(p_string_dir_path->str, permission) == -1)
         {
             result = Err(NULL, "Failed to create folder.", errno);
         }
         else
         {
-            LOG(TRACE, "Folder successfully created.", NULL);
+            LOG_TRACE("Folder successfully created.", NULL);
             result = Ok(NULL);
         }
     }
@@ -56,10 +55,10 @@ Result_void_p fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
 {
     Result_void_p result = Ok(NULL);
     size_t path_length   = p_string_dir_path->length;
-    LOG(TRACE, "Trying to create `%s`", p_string_dir_path->str);
+    LOG_TRACE("Trying to create `%s`", p_string_dir_path->str);
     if (fs_utils_does_exist(p_string_dir_path))
     {
-        LOG(TRACE, "The folder already exists.");
+        LOG_TRACE("The folder already exists.");
         return Ok(NULL);
     }
     char partial_path[path_length + 1];
@@ -76,7 +75,7 @@ Result_void_p fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
         {
             // Terminate the partial string here.
             partial_path[i] = 0;
-            LOG(TRACE, "Trying to create `%s`.", partial_path);
+            LOG_TRACE("Trying to create `%s`.", partial_path);
 
             // Check if this path exists or try to create it.
             String* string_partial_path = unwrap(String_new(partial_path));
@@ -99,23 +98,23 @@ Result_void_p fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
         result = fs_utils_mkdir(p_string_dir_path, permission);
         RET_ON_ERR(result)
     }
-    LOG(TRACE, "`%s` successfully created.", p_string_dir_path->str);
+    LOG_TRACE("`%s` successfully created.", p_string_dir_path->str);
     return Ok(NULL);
 }
 
 Result_void_p fs_utils_rmdir(String* p_string_dir_path)
 {
-    LOG(INFO, "Trying to remove `%s` folder.", p_string_dir_path->str);
+    LOG_INFO("Trying to remove `%s` folder.", p_string_dir_path->str);
     if (rmdir(p_string_dir_path->str))
     {
-        LOG(ERROR, "Failed to delete `%s`.", p_string_dir_path->str)
+        LOG_ERROR("Failed to delete `%s`.", p_string_dir_path->str)
         String* error_message
             = unwrap(String_new("Failed to delete `%s`.", p_string_dir_path->str));
         String_destroy(error_message);
         return Err(NULL, error_message->str, errno);
     }
 
-    LOG(INFO, "`%s` folder successfully removed.", p_string_dir_path->str);
+    LOG_INFO("`%s` folder successfully removed.", p_string_dir_path->str);
     return Ok(NULL);
 }
 
@@ -140,7 +139,7 @@ Result_void_p fs_utils_rm(String* p_string_file_path)
         // It is a file.
         if (unlink(p_string_file_path->str))
         {
-            LOG(TRACE, "Removal failed with errno: %d.", errno);
+            LOG_TRACE("Removal failed with errno: %d.", errno);
             result = Err(NULL, "Could not remove file.", errno);
         }
     }
@@ -152,7 +151,7 @@ Result_void_p fs_utils_rm(String* p_string_file_path)
     fts_close(fts_p);
     String_destroy(p_string_file_path);
     RET_ON_ERR(result)
-    LOG(TRACE, "`%s` successfully deleted.", p_string_file_path->str);
+    LOG_TRACE("`%s` successfully deleted.", p_string_file_path->str);
     return result;
 }
 
@@ -169,16 +168,16 @@ Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
     {
         // We are inside a directory - recurse;
         FTSENT* children = fts_children(fts_p, 0);
-        LOG(TRACE, "Folder `%s` found", dir_entry_p->fts_path);
+        LOG_TRACE("Folder `%s` found", dir_entry_p->fts_path);
         FTSENT* link = children;
         while (link != NULL)
         {
-            LOG(TRACE, "Found child: %s.", link->fts_name);
+            LOG_TRACE("Found child: %s.", link->fts_name);
             // TODO: String_join()
             String* child_path_string
                 = unwrap(String_new("%s/%s", p_string_dir_path->str, link->fts_name));
 
-            LOG(TRACE, "Trying: %s.", child_path_string->str);
+            LOG_TRACE("Trying: %s.", child_path_string->str);
             // Do your recursion thing.
             result = recursive_rm_r(fts_p, child_path_string);
             String_destroy(child_path_string);
@@ -190,16 +189,16 @@ Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
     // The recursion is over. Delete what you found.
     if (dir_entry_p->fts_info & FTS_D)
     {
-        LOG(TRACE, "Trying to delete folder `%s`", p_string_dir_path->str);
+        LOG_TRACE("Trying to delete folder `%s`", p_string_dir_path->str);
         result = fs_utils_rmdir(p_string_dir_path);
         RET_ON_ERR(result)
     }
     else if (dir_entry_p->fts_info & FTS_F)
     {
-        LOG(TRACE, "Trying to delete file `%s`", p_string_dir_path->str);
+        LOG_TRACE("Trying to delete file `%s`", p_string_dir_path->str);
         if (unlink(p_string_dir_path->str))
         {
-            LOG(ERROR, "Removal failed with errno: %d.", errno);
+            LOG_ERROR("Removal failed with errno: %d.", errno);
             return Err(NULL, "Could not remove file.", errno);
         }
     }
@@ -209,7 +208,7 @@ Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
 Result_void_p fs_utils_rm_r(String* p_string_dir_path)
 {
     Result_void_p result = Ok(NULL);
-    LOG(INFO, "Trying to remove `%s` recursively.", p_string_dir_path->str);
+    LOG_INFO("Trying to remove `%s` recursively.", p_string_dir_path->str);
     char* paths[] = {(char*)p_string_dir_path->str, NULL};
     // Create the received path handle.
     FTS* fts_p = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, NULL);
@@ -224,6 +223,6 @@ Result_void_p fs_utils_rm_r(String* p_string_dir_path)
     fts_close(fts_p);
     RET_ON_ERR(result)
 
-    LOG(INFO, "`%s` successfully deleted.", p_string_dir_path->str);
+    LOG_INFO("`%s` successfully deleted.", p_string_dir_path->str);
     return result;
 }

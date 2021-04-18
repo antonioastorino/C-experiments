@@ -30,8 +30,8 @@ analyze_mem() {
 }
 
 pushd "${BASE_DIR}" >/dev/null
-/bin/rm -r test/artifacts/*
-/bin/rm "${LOG_FILE_ERR}"
+/bin/rm -r test/artifacts/* 2>/dev/null
+/bin/rm "${LOG_FILE_ERR}" 2>/dev/null
 
 for file in $(find . -name "*.c"); do clang-format -i ${file}; done
 for file in $(find . -name "*.h"); do clang-format -i ${file}; done
@@ -48,14 +48,16 @@ if [ "${MODE}" = "test" ] || [ "${MODE}" = "debug" ]; then
     touch test/artifacts/non-empty/inner/inner_l2/file.txt
     touch test/artifacts/delete_me.txt
     [ $(grep -c "^#define TEST 0" "${COMMON_HEADER}") -eq 1 ] && make clean
+    if [ -z ${LOG_LEVEL} ]; then LOG_LEVEL=5; fi
     sed -i.bak 's/^#define TEST 0/#define TEST 1/' "${COMMON_HEADER}"
     sed -i.bak 's/^#define MEM_ANALYSIS 0/#define MEM_ANALYSIS 1/' "${COMMON_HEADER}"
-    sed -i.bak 's/^#define LOG_LEVEL 0/#define LOG_LEVEL 1/' "${COMMON_HEADER}"
+    sed -i.bak "s/^#define LOG_LEVEL .*/#define LOG_LEVEL ${LOG_LEVEL}/" "${COMMON_HEADER}"
 else
     [ $(grep -c "^#define TEST 1" "${COMMON_HEADER}") -eq 1 ] && make clean
+    if [ -z ${LOG_LEVEL} ]; then LOG_LEVEL=5; fi
     sed -i.bak 's/^#define TEST 1/#define TEST 0/' "${COMMON_HEADER}"
     sed -i.bak 's/^#define MEM_ANALYSIS 1/#define MEM_ANALYSIS 0/' "${COMMON_HEADER}"
-    sed -i.bak 's/^#define LOG_LEVEL 1/#define LOG_LEVEL 0/' "${COMMON_HEADER}"
+    sed -i.bak "s/^#define LOG_LEVEL .*/#define LOG_LEVEL ${LOG_LEVEL}/" "${COMMON_HEADER}"
 fi
 /bin/rm -f *.bak
 echo -e "\n\n --- Building and running ${MODE} --- \n\n"

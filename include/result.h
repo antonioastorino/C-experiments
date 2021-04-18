@@ -1,5 +1,6 @@
 #ifndef RESULT_H
 #define RESULT_H
+#include "common.h"
 
 typedef struct class_string String;
 typedef struct class_json_obj JsonObj;

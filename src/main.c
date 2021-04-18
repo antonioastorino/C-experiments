@@ -20,20 +20,16 @@ int main(int argc, char** argv)
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
 #if TEST == 1
-    // test_fs_utils();
-    // test_logger();
-    // test_class_string();
-    // test_converter();
+    test_fs_utils();
+    test_logger();
+    test_class_string();
+    test_converter();
     test_class_json();
 
 #else
-    printf("Run 'bin/build-run.sh test' to run the unit tests\n");
-    // insert code here...
-    FILE* file_1 = fopen("/Volumes/DataMBP/delete_me/file1.txt", "w+");
-    if (file_1 == NULL)
-    {
-        fprintf(stderr, "Failed to open file: errno %d\n", errno);
-    }
+    String* my_string = unwrap(String_new("Hello world!"));
+    String_println((const String*)my_string);
+    String_destroy(my_string);
 
 #endif
     return 0;

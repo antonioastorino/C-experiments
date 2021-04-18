@@ -1,6 +1,6 @@
 #ifndef MEM_H
 #define MEM_H
-#include "logger.h"
+#include "common.h"
 #include <ctype.h>
 #include <stdarg.h>
 
