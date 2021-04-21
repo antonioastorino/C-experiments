@@ -3,9 +3,6 @@
 #include "class_string.h"
 #include "common.h"
 
-#define LOG_OUT_FILE stdout
-#define LOG_ERR_FILE stdout
-
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
@@ -19,14 +16,21 @@
 #define LOG_LEVEL_WARN 2
 #define LOG_LEVEL_ERROR 1
 
+FILE* log_out_file_p;
+FILE* log_err_file_p;
 void get_datetime(char*, const size_t);
+
+void init_logger(const char*, const char*);
+
+FILE* get_log_out_file();
+FILE* get_log_err_file();
 
 #define CHECK_LOG_LENGTH(args...)                                                                  \
     char log_message[1024];                                                                        \
     if (snprintf(log_message, 1024, args) > 1023)                                                  \
     {                                                                                              \
-        fprintf(LOG_ERR_FILE, "WARN: the following log message is longer "                         \
-                              "that maximum allowed (1024 bytes).\n");                             \
+        fprintf(get_log_err_file(), "WARN: the following log message is longer "                   \
+                                    "that maximum allowed (1024 bytes).\n");                       \
     }
 
 #if LOG_LEVEL >= LOG_LEVEL_TRACE
@@ -35,7 +39,7 @@ void get_datetime(char*, const size_t);
         char datetime[25];                                                                         \
         get_datetime(datetime, 25);                                                                \
         CHECK_LOG_LENGTH(args)                                                                     \
-        fprintf(LOG_OUT_FILE, "%s - TRACE - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,       \
+        fprintf(get_log_out_file(), "%s - TRACE - %s:%d - %s\n", datetime, __FILENAME__, __LINE__, \
                 log_message);                                                                      \
     }
 #else
@@ -48,7 +52,7 @@ void get_datetime(char*, const size_t);
         char datetime[25];                                                                         \
         get_datetime(datetime, 25);                                                                \
         CHECK_LOG_LENGTH(args)                                                                     \
-        fprintf(LOG_OUT_FILE, "%s - DEBUG - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,       \
+        fprintf(get_log_out_file(), "%s - DEBUG - %s:%d - %s\n", datetime, __FILENAME__, __LINE__, \
                 log_message);                                                                      \
     }
 #else
@@ -61,7 +65,7 @@ void get_datetime(char*, const size_t);
         char datetime[25];                                                                         \
         get_datetime(datetime, 25);                                                                \
         CHECK_LOG_LENGTH(args)                                                                     \
-        fprintf(LOG_OUT_FILE, "%s - INFO - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,        \
+        fprintf(get_log_out_file(), "%s - INFO - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,  \
                 log_message);                                                                      \
     }
 #else
@@ -74,7 +78,7 @@ void get_datetime(char*, const size_t);
         char datetime[25];                                                                         \
         get_datetime(datetime, 25);                                                                \
         CHECK_LOG_LENGTH(args)                                                                     \
-        fprintf(LOG_ERR_FILE, "%s - WARN - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,        \
+        fprintf(get_log_err_file(), "%s - WARN - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,  \
                 log_message);                                                                      \
     }
 #else
@@ -87,7 +91,7 @@ void get_datetime(char*, const size_t);
         char datetime[25];                                                                         \
         get_datetime(datetime, 25);                                                                \
         CHECK_LOG_LENGTH(args)                                                                     \
-        fprintf(LOG_ERR_FILE, "%s - ERROR - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,       \
+        fprintf(get_log_err_file(), "%s - ERROR - %s:%d - %s\n", datetime, __FILENAME__, __LINE__, \
                 log_message);                                                                      \
     }
 #else

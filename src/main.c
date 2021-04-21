@@ -20,6 +20,7 @@ int main(int argc, char** argv)
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
 #if TEST == 1
+    // init_logger("prj-out.log", "prj-out.log");
     test_fs_utils();
     test_logger();
     test_class_string();
