@@ -3,7 +3,7 @@
 #if TEST == 1
 void test_fs_utils()
 {
-    PRINT_BANNER("Testing fs_utils")
+    PRINT_BANNER
     Result_void_p res_void;
     Error err;
     String* path_string;

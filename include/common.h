@@ -7,7 +7,7 @@
 #define LOG_LEVEL 5
 #define MEM_ANALYSIS 1
 
-#if TEST
+#if TEST == 1
 #define ASSERT_EQ(value_1, value_2, message)                                                       \
     if (value_1 == value_2)                                                                        \
     {                                                                                              \
@@ -19,14 +19,14 @@
         fprintf(stderr, "\n> Err - Test failed.\n%s:%d : left != right\n", __FILE__, __LINE__);    \
     }
 
-#define PRINT_BANNER(title)                                                                        \
+#define PRINT_BANNER                                                                               \
     printf("\n");                                                                                  \
-    for (size_t i = 0; i < strlen(title) + 12; i++)                                                \
+    for (size_t i = 0; i < strlen(__FUNCTION__) + 12; i++)                                         \
     {                                                                                              \
         printf("=");                                                                               \
     }                                                                                              \
-    printf("\n-- TEST: %s --\n", title);                                                           \
-    for (size_t i = 0; i < strlen(title) + 12; i++)                                                \
+    printf("\n-- TEST: %s --\n", __FUNCTION__);                                                    \
+    for (size_t i = 0; i < strlen(__FUNCTION__) + 12; i++)                                         \
     {                                                                                              \
         printf("=");                                                                               \
     }                                                                                              \

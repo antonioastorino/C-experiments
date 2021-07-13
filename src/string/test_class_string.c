@@ -4,7 +4,7 @@ void test_class_string()
 {
     Result_void_p res_void;
     String* test_string_p;
-    PRINT_BANNER("String class")
+    PRINT_BANNER
 
     PRINT_TEST_TITLE("New from string")
     const char* str = "Hello everybody";

@@ -3,7 +3,7 @@
 #if TEST == 1
 void test_converter()
 {
-    PRINT_BANNER("Converter")
+    PRINT_BANNER
 
     PRINT_TEST_TITLE("Valid to-int conversions");
     ASSERT_EQ(unwrap(str_to_int("12345")), 12345, "Integer successfully converted");

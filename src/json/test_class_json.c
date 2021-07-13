@@ -7,7 +7,7 @@
 
 void test_class_json()
 {
-    PRINT_BANNER("Test Json class")
+    PRINT_BANNER
 
     FILE* json_file = fopen("test/assets/test_json.json", "r");
     int c;
