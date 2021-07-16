@@ -5,7 +5,7 @@
 #if TEST == 1
 void test_logger()
 {
-    PRINT_BANNER
+    PRINT_BANNER();
 
     LOG_TRACE("Test")
     LOG_TRACE("Test with format %d", 23)

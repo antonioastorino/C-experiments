@@ -35,7 +35,7 @@ typedef enum
         fprintf(stderr, "\n> Err - Test failed.\n%s:%d : left != right\n", __FILE__, __LINE__);    \
     }
 
-#define PRINT_BANNER                                                                               \
+#define PRINT_BANNER()                                                                             \
     printf("\n");                                                                                  \
     for (size_t i = 0; i < strlen(__FUNCTION__) + 12; i++)                                         \
     {                                                                                              \
