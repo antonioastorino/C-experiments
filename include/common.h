@@ -7,6 +7,22 @@
 #define LOG_LEVEL 5
 #define MEM_ANALYSIS 1
 
+// ----------- Error codes ---------- //
+typedef enum
+{
+    ERR_ALL_GOOD = 0,
+    ERR_NULL,
+    ERR_CREATE_STRING,
+    ERR_EMPTY_STRING,
+    ERR_JSON_INVALID,
+    ERR_PARSE_STRING_TO_INT,
+    ERR_PARSE_STRING_TO_FLOAT,
+    ERR_FOLDER_EXISTS,
+    ERR_FOLDER_NOT_FOUND,
+    ERR_FOLDER_NON_EMPTY
+} ErrorCode;
+// ---------------------------------- //
+
 #if TEST == 1
 #define ASSERT_EQ(value_1, value_2, message)                                                       \
     if (value_1 == value_2)                                                                        \

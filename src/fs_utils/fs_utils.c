@@ -1,5 +1,6 @@
 #include "fs_utils.h"
 #include "logger.h"
+#include "mem.h"
 #include <errno.h>
 #include <fts.h>
 #include <stdio.h>
@@ -9,6 +10,7 @@
 #include <unistd.h>
 // Private.
 Result_void_p recursive_rm_r(FTS*, String*);
+bool fs_utils_does_exist(String*);
 
 bool fs_utils_does_exist(String* p_path)
 {
@@ -44,7 +46,7 @@ Result_void_p fs_utils_mkdir(String* p_string_dir_path, mode_t permission)
     }
     else
     {
-        result = Err(NULL, "The folder already exists.", errno);
+        result = Err(NULL, "The folder already exists.", ERR_FOLDER_EXISTS);
     }
     // Restore the previous mask.
     umask(old_mask);
@@ -105,13 +107,15 @@ Result_void_p fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
 Result_void_p fs_utils_rmdir(String* p_string_dir_path)
 {
     LOG_INFO("Trying to remove `%s` folder.", p_string_dir_path->str);
+    if (!fs_utils_does_exist(p_string_dir_path))
+    {
+        return Err(NULL, "Folder not found.", ERR_FOLDER_NOT_FOUND);
+    }
     if (rmdir(p_string_dir_path->str))
     {
         LOG_ERROR("Failed to delete `%s`.", p_string_dir_path->str)
-        String* error_message
-            = unwrap(String_new("Failed to delete `%s`.", p_string_dir_path->str));
-        String_destroy(error_message);
-        return Err(NULL, error_message->str, errno);
+
+        return Err(NULL, "Failed to delete folder.", errno);
     }
 
     LOG_INFO("`%s` folder successfully removed.", p_string_dir_path->str);
@@ -152,6 +156,52 @@ Result_void_p fs_utils_rm(String* p_string_file_path)
     String_destroy(p_string_file_path);
     RET_ON_ERR(result)
     LOG_TRACE("`%s` successfully deleted.", p_string_file_path->str);
+    return result;
+}
+
+Result_String_p fs_utils_read_to_string_from_path_as_char_p(const char* file_path_as_char_p)
+{
+    Result_String_p ret_result;
+    const String* file_path_as_string_p = unwrap(String_new(file_path_as_char_p));
+    ret_result = fs_utils_read_to_string_from_path_as_string_p(file_path_as_string_p);
+    String_destroy((String*)file_path_as_string_p);
+    return ret_result;
+}
+
+Result_String_p fs_utils_read_to_string_from_path_as_string_p(const String* p_string_file_path)
+{
+    Result_String_p result;
+    FILE* file_handler = fopen(p_string_file_path->str, "r");
+    int c;
+    size_t chars_read = 0;
+    size_t size       = 4096;
+    char* buf         = MALLOC(size);
+    if (buf == NULL)
+    {
+        fprintf(stderr, "out of memory\n");
+        exit(1);
+    }
+
+    while ((c = getc(file_handler)) != EOF)
+    {
+        if (chars_read >= size - 1)
+        {
+            /* time to make it bigger */
+            size = (size_t)(size * 1.5);
+            buf  = REALLOCF(buf, size);
+            if (buf == NULL)
+            {
+                fprintf(stderr, "out of memory\n");
+                exit(1);
+            }
+        }
+        buf[chars_read++] = c;
+    }
+    buf[chars_read++] = '\0';
+    fclose(file_handler);
+    result = String_new(buf);
+    FREE(buf);
+    buf = NULL;
     return result;
 }
 
@@ -209,6 +259,10 @@ Result_void_p fs_utils_rm_r(String* p_string_dir_path)
 {
     Result_void_p result = Ok(NULL);
     LOG_INFO("Trying to remove `%s` recursively.", p_string_dir_path->str);
+    if (!fs_utils_does_exist(p_string_dir_path))
+    {
+        return Err(NULL, "Folder not found", ERR_FOLDER_NOT_FOUND);
+    }
     char* paths[] = {(char*)p_string_dir_path->str, NULL};
     // Create the received path handle.
     FTS* fts_p = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, NULL);
