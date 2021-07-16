@@ -1,4 +1,6 @@
 #include "class_string.h"
+#include "common.h"
+
 #if TEST == 1
 void test_class_string()
 {

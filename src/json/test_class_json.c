@@ -53,8 +53,8 @@ void test_class_json()
     int value_int;                 // Hold objects of type int.
     float value_float;             // Hold objects of type float.
     JsonArray* json_array;         // Hold objects of type JsonArray.
-    JsonItem_get(json_obj_p->root_p, "text_key", &value_str);
-    ASSERT_EQ(strcmp("text_value", value_str), 0, "String value found in first item");
+    JsonItem_get(json_obj_p->root_p, "token", &value_str);
+    ASSERT_EQ(strcmp("token_value", value_str), 0, "String value found in first item");
 
     JsonItem_get(json_obj_p->root_p, "text_sibling", &value_str);
     ASSERT_EQ(strcmp("sibling_value", value_str), 0, "String value found in sibling");
@@ -99,5 +99,20 @@ void test_class_json()
               "Array element of type C-string read correctly");
 
     JsonObj_destroy(json_obj_p);
+
+    Result_JsonObj_p res_json_obj_p;
+    PRINT_TEST_TITLE("Invalid JSON string - empty")
+    json_string_p  = unwrap(String_new(""));
+    res_json_obj_p = JsonObj_new_from_string_p(json_string_p);
+    ASSERT_EQ(unwrap_err(res_json_obj_p).code, ERR_EMPTY_STRING, "Empty JSON fails to initialize.");
+    String_destroy(json_string_p);
+
+    PRINT_TEST_TITLE("Invalid JSON string - string not starting with '{'")
+    // TODO: crate toke analyzer and add TC's.
+    json_string_p  = unwrap(String_new("This is not a JSON file"));
+    res_json_obj_p = JsonObj_new_from_string_p(json_string_p);
+    ASSERT_EQ(unwrap_err(res_json_obj_p).code, ERR_JSON_INVALID,
+              "Invalid JSON fails to initialize.");
+    String_destroy(json_string_p);
 }
 #endif

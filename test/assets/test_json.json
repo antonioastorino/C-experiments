@@ -1,5 +1,5 @@
 {
-	"text_key": "text_value",
+	"token": "token_value",
 	"nested_1": {
 		"object_1.1": "item_1.1",
 		"object_1.2": "item_1.2"

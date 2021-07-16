@@ -1,5 +1,7 @@
 #include "class_json.h"
+#include "common.h"
 #include "converter.h"
+#include "logger.h"
 #include "mem.h"
 #include <stdio.h>
 #include <stdlib.h> // contains free()
@@ -50,10 +52,8 @@ ElementType get_value_type(char* initial_char_p)
     }
 }
 
-// bool validate_tokens_str(const char* tokens_str_p) { while () }
 String* strip_whitespace(const String* json_string_p)
 {
-    String* ret_tokens_string_p;
     // The returned string cannot be longer than the input string (plus an termination char).
     char ret_cleaned_char_p[json_string_p->length + 1];
 
@@ -161,16 +161,21 @@ String* generate_tokens(String* json_string_p)
 
 Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
 {
-    JsonObj* json_obj_p       = (JsonObj*)MALLOC(sizeof(JsonObj));
-    json_obj_p->json_string_p = strip_whitespace(json_string_p);
-    if ((json_obj_p->json_string_p->str[0]
-         != '{') /*&& (json_obj_p->json_string_p->str[0] != '[')*/)
+    JsonObj* json_obj_p = NULL;
+    if (json_string_p->length == 0)
+    {
+        LOG_ERROR("Empty JSON string detected");
+        return Err(json_obj_p, "Empty string not allowed here;", ERR_EMPTY_STRING);
+    }
+    String* trimmed_json_string_p = strip_whitespace(json_string_p);
+    if ((trimmed_json_string_p->str[0] != '{') /*&& (json_obj_p->json_string_p->str[0] != '[')*/)
     {
         // TODO: Handle case in which the JSON string starts with [{ (array of objects).
-        JsonObj_destroy(json_obj_p);
-        // TODO: error code.
-        return Err(json_obj_p, "Invalid JSON string.", -1);
+        String_destroy(trimmed_json_string_p);
+        return Err(json_obj_p, "Invalid JSON string.", ERR_JSON_INVALID);
     }
+    json_obj_p                = (JsonObj*)MALLOC(sizeof(JsonObj));
+    json_obj_p->json_string_p = trimmed_json_string_p;
 
     char* curr_pos_p      = json_obj_p->json_string_p->str; // position analyzed (iterator)
     JsonItem* curr_item_p = NULL;
@@ -351,13 +356,16 @@ void JsonItem_destroy(JsonItem* json_item)
     {
         return;
     }
-    if (json_item->value->value_type == VALUE_ITEM)
+    if (json_item->value)
     {
-        JsonItem_destroy(json_item->value->value_child_p);
-    }
-    if (json_item->value->value_type == VALUE_ARRAY)
-    {
-        JsonItem_destroy(json_item->value->value_array_p->element);
+        if (json_item->value->value_type == VALUE_ITEM)
+        {
+            JsonItem_destroy(json_item->value->value_child_p);
+        }
+        if (json_item->value->value_type == VALUE_ARRAY)
+        {
+            JsonItem_destroy(json_item->value->value_array_p->element);
+        }
     }
     if (json_item->next_sibling != NULL)
     {

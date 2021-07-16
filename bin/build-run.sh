@@ -30,8 +30,10 @@ analyze_mem() {
 }
 
 pushd "${BASE_DIR}" >/dev/null
-/bin/rm -r test/artifacts/* 2>/dev/null
-/bin/rm "${LOG_FILE_ERR}" 2>/dev/null
+
+/bin/rm -rf test/artifacts/*
+/bin/rm -f "${LOG_FILE_OUT}"
+/bin/rm -f "${LOG_FILE_ERR}"
 
 for file in $(find . -name "*.c"); do clang-format -i ${file}; done
 for file in $(find . -name "*.h"); do clang-format -i ${file}; done
@@ -59,7 +61,9 @@ else
     sed -i.bak 's/^#define MEM_ANALYSIS 1/#define MEM_ANALYSIS 0/' "${COMMON_HEADER}"
     sed -i.bak "s/^#define LOG_LEVEL .*/#define LOG_LEVEL ${LOG_LEVEL}/" "${COMMON_HEADER}"
 fi
-/bin/rm -f *.bak
+
+/bin/rm -f $(dirname ${COMMON_HEADER})/*.bak
+
 echo -e "\n\n --- Building and running ${MODE} --- \n\n"
 if [ "${MODE}" = "test" ]; then
     make && ./prj-out-0 1>"${LOG_FILE_OUT}" 2>"${LOG_FILE_ERR}"

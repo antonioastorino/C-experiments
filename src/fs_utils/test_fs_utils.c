@@ -1,3 +1,4 @@
+#include "common.h"
 #include "fs_utils.h"
 
 #if TEST == 1
@@ -78,7 +79,7 @@ void test_fs_utils()
     String_destroy(path_string);
 
     PRINT_TEST_TITLE("read to string - short text, use const char * for file path");
-    content_string = unwrap(fs_utils_read_to_string("test/assets/readme.txt"));
+    content_string = unwrap(fs_utils_read_to_string((const char*)"test/assets/readme.txt"));
     ASSERT_EQ(strcmp(content_string->str, "This is a very good string!"), 0,
               "File read correctly.");
     String_destroy(content_string);
