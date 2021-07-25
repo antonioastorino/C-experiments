@@ -4,6 +4,14 @@
 #include "common.h"
 #include "result.h"
 // A air `key` `value`, plus a `parent` to make a double-linked list, and a `sibling`.
+#define SET_MISSING_ENTRY(result, bool_value, success_string)                                      \
+    if (result.err.code)                                                                           \
+    {                                                                                              \
+        LOG_ON_ERR(result, success_string);                                                        \
+        bool_value = true;                                                                         \
+    }
+
+// A air `key` `value`, plus a `parent` to make a double-linked list, and a `sibling`.
 typedef struct json_item JsonItem;
 // Any possible value, including another `JsonItem`.
 typedef struct json_value JsonValue;
@@ -78,7 +86,8 @@ void JsonObj_destroy(JsonObj*);
 
 void JsonObj_get_tokens(String*);
 
-#define GET_VALUE_h(suffix, out_type) void get_##suffix(const JsonItem*, const char*, out_type);
+#define GET_VALUE_h(suffix, out_type)                                                              \
+    Result_void_p get_##suffix(const JsonItem*, const char*, out_type);
 GET_VALUE_h(value_char_p, const char**);
 GET_VALUE_h(value_int, int*);
 GET_VALUE_h(value_float, float*);
@@ -86,7 +95,7 @@ GET_VALUE_h(value_child_p, JsonItem**);
 GET_VALUE_h(value_array_p, JsonArray**);
 
 #define GET_ARRAY_VALUE_h(suffix, out_type)                                                        \
-    void get_array_##suffix(const JsonArray*, size_t, out_type);
+    Result_void_p get_array_##suffix(const JsonArray*, size_t, out_type);
 GET_ARRAY_VALUE_h(value_char_p, const char**);
 GET_ARRAY_VALUE_h(value_int, int*);
 GET_ARRAY_VALUE_h(value_float, float*);

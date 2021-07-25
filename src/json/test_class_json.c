@@ -1,9 +1,10 @@
 #include "class_json.h"
-
-#if TEST == 1
-#include "converter.h"
+#include "class_string.h"
+#include "common.h"
+#include "logger.h"
 #include "mem.h"
-#include <stdlib.h> // contains free()
+#include <stdlib.h>
+#if TEST == 1
 
 String* load_file(char* filename)
 {
@@ -54,6 +55,7 @@ void test_class_json()
     JsonArray* json_array;   // Hold objects of type JsonArray.
     JsonArray* json_array_2; // Hold objects of type JsonArray.
     const char* json_char_p;
+    bool missing_entry = false;
 
     PRINT_TEST_TITLE("Key-value pair");
     json_char_p = " {\"key\": \"value string\"}";
@@ -137,15 +139,31 @@ void test_class_json()
     JsonObj_destroy(json_obj_p);
     String_destroy(json_string_p);
 
+    PRINT_TEST_TITLE("test_json_array_3.json");
+    json_string_p = load_file("test/assets/test_json_array_3.json");
+    json_obj_p    = unwrap(JsonObj_new(json_string_p));
+    SET_MISSING_ENTRY(JsonItem_get(json_obj_p->root_p, "Snapshot", &json_item), missing_entry,
+                      "Snapshot found");
+    ASSERT_EQ(missing_entry, false, "OK");
+    SET_MISSING_ENTRY(JsonItem_get(json_item, "Data", &json_array), missing_entry, "Data found");
+    ASSERT_EQ(missing_entry, false, "OK");
+    SET_MISSING_ENTRY(JsonArray_get(json_array, 0, &json_item), missing_entry, "Array found.");
+    ASSERT_EQ(missing_entry, false, "OK");
+    SET_MISSING_ENTRY(JsonItem_get(json_item, "Time", &value_str), missing_entry, "Time found");
+    ASSERT_EQ(missing_entry, false, "OK");
+    ASSERT_EQ(strcmp(value_str, "2021-07-23T08:09:00.000000Z"), 0, "Time correct.");
+    JsonObj_destroy(json_obj_p);
+    String_destroy(json_string_p);
+
     PRINT_TEST_TITLE("Testing test/assets/test_json.json");
     json_string_p = load_file("test/assets/test_json.json");
     json_obj_p    = unwrap(JsonObj_new_from_string_p(json_string_p));
     String_destroy(json_string_p); // We can delete it.
     JsonItem_get(json_obj_p->root_p, "text_key", &value_str);
-    ASSERT_EQ(strcmp("text_value", value_str), 0, "String value found in first item");
+    ASSERT_EQ(strcmp("text_value", value_str), 0, "String*value found in first item");
 
     JsonItem_get(json_obj_p->root_p, "text_sibling", &value_str);
-    ASSERT_EQ(strcmp("sibling_value", value_str), 0, "String value found in sibling");
+    ASSERT_EQ(strcmp("sibling_value", value_str), 0, "String*value found in sibling");
 
     PRINT_TEST_TITLE("Second level");
     JsonItem_get(json_obj_p->root_p, "nested_1", &json_item);
@@ -156,8 +174,8 @@ void test_class_json()
     JsonItem_get(json_item, "object_1.2", &value_str);
     ASSERT_EQ(strcmp(value_str, "item_1.2"), 0, "Found nested sibling object value");
 
-    // JsonItem_get(json_item, "object_32", &value_str);
-    // ASSERT_EQ(value_str, NULL, "Returned NULL for key not found");
+    Result_void_p res_entry_found = JsonItem_get(json_item, "object_32", &value_str);
+    ASSERT_EQ(res_entry_found.err.code, ERR_JSON_MISSING_ENTRY, "Returned NULL for key not found");
 
     JsonItem_get(json_obj_p->root_p, "nested_2", &json_item);
     JsonItem_get(json_item, "object_2.1", &value_str);

@@ -79,6 +79,17 @@ FILE* get_log_err_file();
         fprintf(get_log_err_file(), "%s - WARN - %s:%d - %s\n", datetime, __FILENAME__, __LINE__,  \
                 log_message);                                                                      \
     }
+#define LOG_ON_ERR(result, args...)                                                                \
+    {                                                                                              \
+        if (result.err.code)                                                                       \
+        {                                                                                          \
+            LOG_WARN("%s - code: %d", result.err.message, result.err.code);                        \
+        }                                                                                          \
+        else                                                                                       \
+        {                                                                                          \
+            LOG_DEBUG(args);                                                                       \
+        }                                                                                          \
+    }
 #else
 #define LOG_WARN(args...)
 #endif
