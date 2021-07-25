@@ -3,7 +3,6 @@
 #include "class_string.h"
 #include "common.h"
 #include "result.h"
-
 // A air `key` `value`, plus a `parent` to make a double-linked list, and a `sibling`.
 typedef struct json_item JsonItem;
 // Any possible value, including another `JsonItem`.
@@ -39,6 +38,7 @@ typedef enum
  *     ] not followed by , or }
  */
 
+// Used only for returning data in a convenient way. Not used for storage.
 typedef struct json_array
 {
     struct json_item* element;
@@ -73,6 +73,7 @@ typedef struct class_json_obj
 } JsonObj;
 
 Result_JsonObj_p JsonObj_new_from_string_p(const String*);
+Result_JsonObj_p JsonObj_new_from_char_p(const char*);
 void JsonObj_destroy(JsonObj*);
 
 void JsonObj_get_tokens(String*);
@@ -85,13 +86,19 @@ GET_VALUE_h(value_child_p, JsonItem**);
 GET_VALUE_h(value_array_p, JsonArray**);
 
 #define GET_ARRAY_VALUE_h(suffix, out_type)                                                        \
-    void get_array_##suffix(const JsonArray*, size_t index, out_type);
+    void get_array_##suffix(const JsonArray*, size_t, out_type);
 GET_ARRAY_VALUE_h(value_char_p, const char**);
 GET_ARRAY_VALUE_h(value_int, int*);
 GET_ARRAY_VALUE_h(value_float, float*);
 GET_ARRAY_VALUE_h(value_child_p, JsonItem**);
 
 // clang-format off
+#define JsonObj_new(in_json)                                     \
+    _Generic(in_json,                                            \
+        const char*  : JsonObj_new_from_char_p,                  \
+        String*      : JsonObj_new_from_string_p                 \
+        )(in_json)
+
 #define JsonItem_get(json_item_p, key, out_p)                    \
     _Generic(out_p,                                              \
         const char** : get_value_char_p,                         \

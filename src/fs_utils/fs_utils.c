@@ -9,13 +9,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 // Private.
-Result_void_p recursive_rm_r(FTS*, String*);
-bool fs_utils_does_exist(String*);
+Result_void_p recursive_rm_r(FTS*, const char*);
 
-bool fs_utils_does_exist(String* p_path)
+bool fs_utils_does_exist(const char* p_path)
 {
     struct stat st = {0};
-    if (stat(p_path->str, &st) == -1)
+    if (stat(p_path, &st) == -1)
     {
         return false;
     }
@@ -26,17 +25,18 @@ bool fs_utils_does_exist(String* p_path)
 }
 
 /* ------------------------------------------ Folders ------------------------------------------- */
-Result_void_p fs_utils_mkdir(String* p_string_dir_path, mode_t permission)
+Result_void_p fs_utils_mkdir(const char* dir_path_char_p, mode_t permission)
 {
     Result_void_p result = Ok(NULL);
     // Save the current mode mask and reset the mask.
     mode_t old_mask = umask(0);
-    if (!fs_utils_does_exist(p_string_dir_path))
+    if (!fs_utils_does_exist(dir_path_char_p))
     {
-        LOG_TRACE("Trying to create %s", p_string_dir_path->str);
-        if (mkdir(p_string_dir_path->str, permission) == -1)
+        LOG_TRACE("Trying to create %s", dir_path_char_p);
+        if (mkdir(dir_path_char_p, permission) == -1)
         {
-            result = Err(NULL, "Failed to create folder.", errno);
+            LOG_ERROR("mkdir returned with error code %d", errno);
+            result = Err(NULL, "Failed to create folder.", ERR_GENERIC);
         }
         else
         {
@@ -53,19 +53,20 @@ Result_void_p fs_utils_mkdir(String* p_string_dir_path, mode_t permission)
     return result;
 }
 
-Result_void_p fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
+Result_void_p fs_utils_mkdir_p(const char* dir_path_char_p, mode_t permission)
 {
     Result_void_p result = Ok(NULL);
-    size_t path_length   = p_string_dir_path->length;
-    LOG_TRACE("Trying to create `%s`", p_string_dir_path->str);
-    if (fs_utils_does_exist(p_string_dir_path))
+
+    size_t path_length = strlen(dir_path_char_p);
+    LOG_TRACE("Trying to create `%s`", dir_path_char_p);
+    if (fs_utils_does_exist(dir_path_char_p))
     {
         LOG_TRACE("The folder already exists.");
         return Ok(NULL);
     }
     char partial_path[path_length + 1];
     size_t start_index = 0;
-    if (String_starts_with(p_string_dir_path, "/"))
+    if (dir_path_char_p[0] == '/')
     {
         partial_path[0] = '/';
         // Skip the fist folder found (root folder) in the path - it's an absolute path.
@@ -73,60 +74,58 @@ Result_void_p fs_utils_mkdir_p(String* p_string_dir_path, mode_t permission)
     }
     for (size_t i = start_index; i < path_length; i++)
     {
-        if (p_string_dir_path->str[i] == '/')
+        if (dir_path_char_p[i] == '/')
         {
             // Terminate the partial string here.
             partial_path[i] = 0;
             LOG_TRACE("Trying to create `%s`.", partial_path);
 
             // Check if this path exists or try to create it.
-            String* string_partial_path = unwrap(String_new(partial_path));
-            if (!fs_utils_does_exist(string_partial_path))
+            if (!fs_utils_does_exist(partial_path))
             {
-                result = fs_utils_mkdir(string_partial_path, permission);
-                RET_ON_ERR(result)
+                result = fs_utils_mkdir(partial_path, permission);
+                RET_ON_ERR(NULL, result)
             }
-            String_destroy(string_partial_path);
         }
         // Append path chars to partial_path
-        partial_path[i] = p_string_dir_path->str[i];
+        partial_path[i] = dir_path_char_p[i];
     }
     /*
     If the path terminated with a '/', then it was created. Otherwise, we need to make the last
     call.
     */
-    if (p_string_dir_path->str[path_length - 1] != '/')
+    if (dir_path_char_p[path_length - 1] != '/')
     {
-        result = fs_utils_mkdir(p_string_dir_path, permission);
-        RET_ON_ERR(result)
+        result = fs_utils_mkdir(dir_path_char_p, permission);
+        RET_ON_ERR(NULL, result)
     }
-    LOG_TRACE("`%s` successfully created.", p_string_dir_path->str);
+    LOG_TRACE("`%s` successfully created.", dir_path_char_p);
     return Ok(NULL);
 }
 
-Result_void_p fs_utils_rmdir(String* p_string_dir_path)
+Result_void_p fs_utils_rmdir(const char* dir_path_char_p)
 {
-    LOG_INFO("Trying to remove `%s` folder.", p_string_dir_path->str);
-    if (!fs_utils_does_exist(p_string_dir_path))
+    LOG_INFO("Trying to remove `%s` folder.", dir_path_char_p);
+    if (!fs_utils_does_exist(dir_path_char_p))
     {
-        return Err(NULL, "Folder not found.", ERR_FOLDER_NOT_FOUND);
+        return Err(NULL, "Folder not found.", ERR_NOT_FOUND);
     }
-    if (rmdir(p_string_dir_path->str))
+    if (rmdir(dir_path_char_p))
     {
-        LOG_ERROR("Failed to delete `%s`.", p_string_dir_path->str)
+        LOG_ERROR("Failed to delete `%s`.", dir_path_char_p)
 
         return Err(NULL, "Failed to delete folder.", errno);
     }
 
-    LOG_INFO("`%s` folder successfully removed.", p_string_dir_path->str);
+    LOG_INFO("`%s` folder successfully removed.", dir_path_char_p);
     return Ok(NULL);
 }
 
 /* ------------------------------------------- Files -------------------------------------------- */
-Result_void_p fs_utils_rm(String* p_string_file_path)
+Result_void_p fs_utils_rm_from_path_as_char_p(const char* file_path_as_char_p)
 {
     Result_void_p result = Ok(NULL);
-    char* paths[]        = {p_string_file_path->str, NULL};
+    char* paths[2]       = {(char*)file_path_as_char_p, NULL};
     // Create the received path handle.
     FTS* fts_p = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, NULL);
     if (fts_p == NULL)
@@ -141,7 +140,7 @@ Result_void_p fs_utils_rm(String* p_string_file_path)
     if (dir_entry_p->fts_info & FTS_F)
     {
         // It is a file.
-        if (unlink(p_string_file_path->str))
+        if (unlink(file_path_as_char_p))
         {
             LOG_TRACE("Removal failed with errno: %d.", errno);
             result = Err(NULL, "Could not remove file.", errno);
@@ -150,28 +149,22 @@ Result_void_p fs_utils_rm(String* p_string_file_path)
     else
     {
         // It is a folder.
-        result = fs_utils_rmdir(p_string_file_path);
+        result = fs_utils_rmdir(file_path_as_char_p);
     }
     fts_close(fts_p);
-    String_destroy(p_string_file_path);
-    RET_ON_ERR(result)
-    LOG_TRACE("`%s` successfully deleted.", p_string_file_path->str);
+    RET_ON_ERR(NULL, result)
+    LOG_TRACE("`%s` successfully deleted.", file_path_as_char_p);
     return result;
 }
 
 Result_String_p fs_utils_read_to_string_from_path_as_char_p(const char* file_path_as_char_p)
 {
-    Result_String_p ret_result;
-    const String* file_path_as_string_p = unwrap(String_new(file_path_as_char_p));
-    ret_result = fs_utils_read_to_string_from_path_as_string_p(file_path_as_string_p);
-    String_destroy((String*)file_path_as_string_p);
-    return ret_result;
-}
-
-Result_String_p fs_utils_read_to_string_from_path_as_string_p(const String* p_string_file_path)
-{
-    Result_String_p result;
-    FILE* file_handler = fopen(p_string_file_path->str, "r");
+    String* ret_string_p;
+    FILE* file_handler = fopen(file_path_as_char_p, "r");
+    if (!file_handler)
+    {
+        return Err(ret_string_p, "Failed to open file.", ERR_NULL);
+    }
     int c;
     size_t chars_read = 0;
     size_t size       = 4096;
@@ -199,14 +192,14 @@ Result_String_p fs_utils_read_to_string_from_path_as_string_p(const String* p_st
     }
     buf[chars_read++] = '\0';
     fclose(file_handler);
-    result = String_new(buf);
+    ret_string_p = String_new(buf);
     FREE(buf);
     buf = NULL;
-    return result;
+    return Ok(ret_string_p);
 }
 
 /* ------------------------------------- Files and folders -------------------------------------- */
-Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
+Result_void_p recursive_rm_r(FTS* fts_p, const char* dir_path_char_p)
 {
     Result_void_p result = Ok(NULL);
     /*
@@ -224,14 +217,13 @@ Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
         {
             LOG_TRACE("Found child: %s.", link->fts_name);
             // TODO: String_join()
-            String* child_path_string
-                = unwrap(String_new("%s/%s", p_string_dir_path->str, link->fts_name));
+            String* child_path_string = String_new("%s/%s", dir_path_char_p, link->fts_name);
 
             LOG_TRACE("Trying: %s.", child_path_string->str);
             // Do your recursion thing.
-            result = recursive_rm_r(fts_p, child_path_string);
+            result = recursive_rm_r(fts_p, child_path_string->str);
             String_destroy(child_path_string);
-            RET_ON_ERR(result)
+            RET_ON_ERR(NULL, result)
             // Go to the next entry.
             link = link->fts_link;
         }
@@ -239,14 +231,14 @@ Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
     // The recursion is over. Delete what you found.
     if (dir_entry_p->fts_info & FTS_D)
     {
-        LOG_TRACE("Trying to delete folder `%s`", p_string_dir_path->str);
-        result = fs_utils_rmdir(p_string_dir_path);
-        RET_ON_ERR(result)
+        LOG_TRACE("Trying to delete folder `%s`", dir_path_char_p);
+        result = fs_utils_rmdir(dir_path_char_p);
+        RET_ON_ERR(NULL, result)
     }
     else if (dir_entry_p->fts_info & FTS_F)
     {
-        LOG_TRACE("Trying to delete file `%s`", p_string_dir_path->str);
-        if (unlink(p_string_dir_path->str))
+        LOG_TRACE("Trying to delete file `%s`", dir_path_char_p);
+        if (unlink(dir_path_char_p))
         {
             LOG_ERROR("Removal failed with errno: %d.", errno);
             return Err(NULL, "Could not remove file.", errno);
@@ -255,15 +247,15 @@ Result_void_p recursive_rm_r(FTS* fts_p, String* p_string_dir_path)
     return result;
 }
 
-Result_void_p fs_utils_rm_r(String* p_string_dir_path)
+Result_void_p fs_utils_rm_r(const char* p_string_dir_path)
 {
     Result_void_p result = Ok(NULL);
-    LOG_INFO("Trying to remove `%s` recursively.", p_string_dir_path->str);
+    LOG_INFO("Trying to remove `%s` recursively.", p_string_dir_path);
     if (!fs_utils_does_exist(p_string_dir_path))
     {
-        return Err(NULL, "Folder not found", ERR_FOLDER_NOT_FOUND);
+        return Err(NULL, "Folder not found", ERR_NOT_FOUND);
     }
-    char* paths[] = {(char*)p_string_dir_path->str, NULL};
+    char* paths[] = {(char*)p_string_dir_path, NULL};
     // Create the received path handle.
     FTS* fts_p = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, NULL);
     if (fts_p == NULL)
@@ -275,8 +267,8 @@ Result_void_p fs_utils_rm_r(String* p_string_dir_path)
     // Start deleting recursively.
     result = recursive_rm_r(fts_p, p_string_dir_path);
     fts_close(fts_p);
-    RET_ON_ERR(result)
+    RET_ON_ERR(NULL, result)
 
-    LOG_INFO("`%s` successfully deleted.", p_string_dir_path->str);
+    LOG_INFO("`%s` successfully deleted.", p_string_dir_path);
     return result;
 }

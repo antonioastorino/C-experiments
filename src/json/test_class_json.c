@@ -5,11 +5,9 @@
 #include "mem.h"
 #include <stdlib.h> // contains free()
 
-void test_class_json()
+String* load_file(char* filename)
 {
-    PRINT_BANNER();
-
-    FILE* json_file = fopen("test/assets/test_json.json", "r");
+    FILE* json_file = fopen(filename, "r");
     int c;
     size_t chars_read = 0;
     size_t size       = 4096;
@@ -37,24 +35,114 @@ void test_class_json()
     }
     buf[chars_read++] = '\0';
     fclose(json_file);
-    String* json_string_p = unwrap(String_new(buf));
+    String* json_string_p = String_new(buf);
     FREE(buf);
     buf = NULL;
+    return json_string_p;
+}
 
-    String_println(json_string_p);
+void test_class_json()
+{
+    PRINT_BANNER();
 
-    PRINT_TEST_TITLE("Root level");
+    String* json_string_p;
+    JsonObj* json_obj_p;
+    JsonItem* json_item;     // Hold objects of type JsonItem.
+    const char* value_str;   // Hold objects of type string.
+    int value_int;           // Hold objects of type int.
+    float value_float;       // Hold objects of type float.
+    JsonArray* json_array;   // Hold objects of type JsonArray.
+    JsonArray* json_array_2; // Hold objects of type JsonArray.
+    const char* json_char_p;
 
-    JsonObj* json_obj_p = unwrap(JsonObj_new_from_string_p(json_string_p));
+    PRINT_TEST_TITLE("Key-value pair");
+    json_char_p = " {\"key\": \"value string\"}";
+    json_obj_p  = unwrap(JsonObj_new(json_char_p));
+    JsonItem_get(json_obj_p->root_p, "key", &value_str);
+    ASSERT_EQ(strcmp("value string", value_str), 0, "Key for root found with correct value STRING");
+    JsonObj_destroy(json_obj_p);
 
+    PRINT_TEST_TITLE("Sibling key-value pair");
+    json_char_p = " {\"key\": \"value string\", \"sibling\": 56}";
+    json_obj_p  = unwrap(JsonObj_new(json_char_p));
+    JsonItem_get(json_obj_p->root_p, "key", &value_str);
+    JsonItem_get(json_obj_p->root_p, "sibling", &value_int);
+    ASSERT_EQ(strcmp("value string", value_str), 0, "Key for root value STRING");
+    ASSERT_EQ(56, value_int, "Key for root found with correct value INT")
+    JsonObj_destroy(json_obj_p);
+
+    PRINT_TEST_TITLE("Simple array");
+    json_char_p = " {\"key\": [\"array value\", 56]}";
+    printf("\n%s\n", json_char_p);
+    json_obj_p = unwrap(JsonObj_new(json_char_p));
+    JsonItem_get(json_obj_p->root_p, "key", &json_array);
+    JsonArray_get(json_array, 0, &value_str);
+    ASSERT_EQ(strcmp("array value", value_str), 0, "Array STRING element retrieved.");
+    JsonArray_get(json_array, 1, &value_int);
+    ASSERT_EQ(56, value_int, "Array INT element retrieved.");
+    JsonObj_destroy(json_obj_p);
+
+    PRINT_TEST_TITLE("Array of objects");
+    json_char_p = " {\"key\": [ {\"array key\": 56}]}";
+    printf("\n%s\n", json_char_p);
+    json_obj_p = unwrap(JsonObj_new(json_char_p));
+    JsonItem_get(json_obj_p->root_p, "key", &json_array);
+    JsonArray_get(json_array, 0, &json_item);
+    ASSERT_EQ(strcmp(json_item->key_p, "array key"), 0, "Array STRING element retrieved.");
+    printf("%d\n", json_item->value->value_type);
+    JsonItem_get(json_item, "array key", &value_int);
+    ASSERT_EQ(value_int, 56, "Value found an item that is also array element.")
+    JsonObj_destroy(json_obj_p);
+
+    PRINT_TEST_TITLE("test_json_array_1.json");
+    json_string_p = load_file("test/assets/test_json_array_1.json");
+    json_obj_p    = unwrap(JsonObj_new(json_string_p));
+    JsonItem_get(json_obj_p->root_p, "array_key", &json_array);
+    ASSERT_EQ(json_array != NULL, true, "Array found as root element.");
+    JsonArray_get(json_array, 0, &json_item);
+    ASSERT_EQ(json_item != NULL, true, "First array element is an item.");
+    JsonItem_get(json_item, "object 1", &value_int);
+    ASSERT_EQ(value_int, 56, "Value INT found");
+    JsonArray_get(json_array, 1, &json_item);
+    ASSERT_EQ(json_item != NULL, true, "Second array element is an item.");
+    JsonItem_get(json_item, "object 2", &value_float);
+    ASSERT_EQ(value_float, 404.5f, "Value FLOAT found");
+    JsonArray_get(json_array, 2, &json_item);
+    JsonItem_get(json_item, "object 3", &value_str);
+    ASSERT_EQ(strcmp(value_str, "SOME STRING"), 0, "Array element STRING found.");
+    JsonArray_get(json_array, 3, &value_int);
+    ASSERT_EQ(value_int, 32, "Array element INT found.");
+    JsonObj_destroy(json_obj_p);
+    String_destroy(json_string_p);
+
+    PRINT_TEST_TITLE("test_json_array_2.json");
+    json_string_p = load_file("test/assets/test_json_array_2.json");
+    json_obj_p    = unwrap(JsonObj_new(json_string_p));
+    JsonItem_get(json_obj_p->root_p, "array_key", &json_array);
+    ASSERT_EQ(json_array != NULL, true, "Array found as root element.");
+    JsonArray_get(json_array, 0, &json_item);
+    ASSERT_EQ(json_item != NULL, true, "First array element is an item.");
+    JsonItem_get(json_item, "inner array 1", &json_array_2);
+    JsonArray_get(json_array_2, 0, &value_int);
+    ASSERT_EQ(value_int, 12314, "Value INT found");
+    JsonArray_get(json_array_2, 1, &value_float);
+    ASSERT_EQ(value_float, -32.4f, "Value FLOAT found");
+    JsonArray_get(json_array, 1, &json_item);
+    ASSERT_EQ(json_item != NULL, true, "Second array element is an item.");
+    JsonItem_get(json_item, "inner array 2", &json_array_2);
+    JsonArray_get(json_array_2, 0, &value_float);
+    ASSERT_EQ(value_float, 1.4f, "Value FLOAT found");
+    JsonArray_get(json_array_2, 1, &value_str);
+    ASSERT_EQ(strcmp(value_str, "hello"), 0, "Value STRING found");
+    JsonObj_destroy(json_obj_p);
+    String_destroy(json_string_p);
+
+    PRINT_TEST_TITLE("Testing test/assets/test_json.json");
+    json_string_p = load_file("test/assets/test_json.json");
+    json_obj_p    = unwrap(JsonObj_new_from_string_p(json_string_p));
     String_destroy(json_string_p); // We can delete it.
-    JsonItem* json_item;           // Hold objects of type JsonItem.
-    const char* value_str;         // Hold objects of type string.
-    int value_int;                 // Hold objects of type int.
-    float value_float;             // Hold objects of type float.
-    JsonArray* json_array;         // Hold objects of type JsonArray.
-    JsonItem_get(json_obj_p->root_p, "token", &value_str);
-    ASSERT_EQ(strcmp("token_value", value_str), 0, "String value found in first item");
+    JsonItem_get(json_obj_p->root_p, "text_key", &value_str);
+    ASSERT_EQ(strcmp("text_value", value_str), 0, "String value found in first item");
 
     JsonItem_get(json_obj_p->root_p, "text_sibling", &value_str);
     ASSERT_EQ(strcmp("sibling_value", value_str), 0, "String value found in sibling");
@@ -68,8 +156,8 @@ void test_class_json()
     JsonItem_get(json_item, "object_1.2", &value_str);
     ASSERT_EQ(strcmp(value_str, "item_1.2"), 0, "Found nested sibling object value");
 
-    JsonItem_get(json_item, "object_32", &value_str);
-    ASSERT_EQ(value_str, NULL, "Returned NULL for key not found");
+    // JsonItem_get(json_item, "object_32", &value_str);
+    // ASSERT_EQ(value_str, NULL, "Returned NULL for key not found");
 
     JsonItem_get(json_obj_p->root_p, "nested_2", &json_item);
     JsonItem_get(json_item, "object_2.1", &value_str);
@@ -102,17 +190,26 @@ void test_class_json()
 
     Result_JsonObj_p res_json_obj_p;
     PRINT_TEST_TITLE("Invalid JSON string - empty")
-    json_string_p  = unwrap(String_new(""));
+    json_string_p  = String_new("");
     res_json_obj_p = JsonObj_new_from_string_p(json_string_p);
     ASSERT_EQ(unwrap_err(res_json_obj_p).code, ERR_EMPTY_STRING, "Empty JSON fails to initialize.");
     String_destroy(json_string_p);
 
     PRINT_TEST_TITLE("Invalid JSON string - string not starting with '{'")
-    // TODO: crate toke analyzer and add TC's.
-    json_string_p  = unwrap(String_new("This is not a JSON file"));
+    // TODO: crate token analyzer and add TC's.
+    json_string_p  = String_new("This is not a JSON file");
     res_json_obj_p = JsonObj_new_from_string_p(json_string_p);
     ASSERT_EQ(unwrap_err(res_json_obj_p).code, ERR_JSON_INVALID,
               "Invalid JSON fails to initialize.");
     String_destroy(json_string_p);
+
+    PRINT_TEST_TITLE("Fixed memory leak");
+    json_char_p                     = "{\"request\":[\"Required parameter is missing\"]}";
+    JsonObj* json_with_vector_obj_p = unwrap(JsonObj_new(json_char_p));
+    JsonItem_get(json_with_vector_obj_p->root_p, "request", &json_array);
+    JsonArray_get(json_array, 0, &value_str);
+    ASSERT_EQ(strcmp(value_str, "Required parameter is missing"), 0, "");
+    JsonObj_destroy(json_with_vector_obj_p);
+    /**/
 }
 #endif

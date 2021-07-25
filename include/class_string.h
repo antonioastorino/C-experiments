@@ -15,23 +15,32 @@ typedef struct class_string
     char* str;
 } String;
 
-/**************************************** (De)Constructors ****************************************/
-Result_String_p String_new(const char*, ...);
-Result_String_p String_clone(const String*);
+/************************************* (De)Constructors ***************************************/
+String* String_new(const char*, ...);
+String* String_clone(const String*);
 void String_destroy(String*);
 
-/******************************************** Printers ********************************************/
+/****************************************** Printers ******************************************/
 Result_void_p String_print(const String*);
 Result_void_p String_println(const String*);
-Result_void_p String_display(const String*);
 
-/******************************************** Checkers ********************************************/
-bool String_starts_with(String*, const char*);
+/***************************************** Checkers *******************************************/
+bool String_is_null(const String*);
+bool String_starts_with(const String*, const char*);
+Result_String_p String_between_patterns_in_string_p(String*, const char*, const char*);
+Result_String_p String_between_patterns_in_char_p(const char*, const char*, const char*);
 
-/******************************************* Modifiers ********************************************/
-// Replace the internal string and reallocate memory if necessary.
-Result_void_p String_renew(String*, const char*, ...);
+/**************************************** Modifiers *******************************************/
 Result_void_p String_replace_char(String*, const char, const char);
+Result_void_p String_replace_pattern(String*, const char*, const char*);
+
+// clang-format off
+#define String_between_patterns(in_value, prefix, suffix) \
+    _Generic((in_value), \
+     String*     : String_between_patterns_in_string_p, \
+     const char* : String_between_patterns_in_char_p \
+     )(in_value, prefix, suffix)
+// clang-format on
 
 #if TEST == 1
 void test_class_string(void);

@@ -11,14 +11,14 @@
 
 bool String_is_null(const String* string_obj_p)
 {
-    if ((string_obj_p == NULL) || (string_obj_p->str == NULL))
-    {
+    if (string_obj_p == NULL)
         return true;
-    }
+    if (string_obj_p->str == NULL)
+        return true;
     return false;
 }
 
-Result_String_p String_new(const char* format, ...)
+String* String_new(const char* format, ...)
 {
     va_list args;
     char* tmp_str_p = NULL;
@@ -27,8 +27,8 @@ Result_String_p String_new(const char* format, ...)
     // Calculate how many bytes are needed (excluding the terminating '\0').
     if (VASPRINTF(&tmp_str_p, format, args) == -1)
     {
-        LOG_ERROR("Something went wrong with vasprintf - errno: %d", errno)
-        return Err(out_string_obj_p, "Failed to create string.", errno);
+        LOG_ERROR("Out of memory", errno)
+        exit(ERR_NULL);
     }
     size_t actual_size = strlen(tmp_str_p);
     // Allocate twice the required length
@@ -42,102 +42,51 @@ Result_String_p String_new(const char* format, ...)
     out_string_obj_p->str    = tmp_str_p;
     out_string_obj_p->length = actual_size;
     out_string_obj_p->size   = allocated_size;
-    return Ok(out_string_obj_p);
+    return out_string_obj_p;
 }
 
-Result_String_p String_clone(const String* origin) { return String_new(origin->str); }
-
-Result_void_p String_renew(String* string_obj_p, const char* new_format, ...)
-{
-    if (String_is_null(string_obj_p))
-    {
-        return Err(NULL, "The provided string points to NULL.", -1);
-    }
-    va_list args;
-    char* tmp_str_p = NULL;
-    va_start(args, new_format);
-    // Calculate how many bytes are needed (excluding the terminating '\0').
-    if (VASPRINTF(&tmp_str_p, new_format, args) == -1)
-    {
-        return Err(NULL, "Failed to parse format.", errno);
-    }
-    size_t new_len = strlen(tmp_str_p);
-
-    // Update string.
-    if (new_len >= string_obj_p->size)
-    {
-        // Increase the allocated size.
-        string_obj_p->size = (size_t)(new_len * SIZE_FACTOR);
-        string_obj_p->str  = (char*)REALLOCF(string_obj_p->str, sizeof(char) * string_obj_p->size);
-    }
-    string_obj_p->length = new_len;
-    // Copy an extra byte for the NULL characther.
-    strncpy(string_obj_p->str, tmp_str_p, new_len + 1);
-    FREE(tmp_str_p);
-    return Ok(NULL);
-}
+String* String_clone(const String* origin) { return String_new(origin->str); }
 
 void String_destroy(String* string_obj_p)
 {
     FREE(string_obj_p->str);
-    string_obj_p->str    = NULL;
+    string_obj_p->str    = 0;
     string_obj_p->length = -1;
     string_obj_p->size   = -1;
 
     FREE(string_obj_p);
-    string_obj_p = NULL;
 }
 
 Result_void_p String_print(const String* string_obj_p)
 {
     if (String_is_null(string_obj_p))
     {
-        return Err(NULL, "Uninitialized string.", -1);
+        return Err(NULL, "Uninitialized string.", ERR_NULL);
     }
     for (size_t i = 0; i < string_obj_p->length; i++)
     {
         printf("%c", string_obj_p->str[i]);
     }
+    fflush(stdout);
     return Ok(NULL);
 }
 
 Result_void_p String_println(const String* string_obj_p)
 {
     Result_void_p result = String_print(string_obj_p);
-    RET_ON_ERR(result);
+    RET_ON_ERR(NULL, result);
     printf("\n");
     return result;
 }
 
-Result_void_p String_display(const String* string_obj_p)
+// TODO: Change to Result_bool.
+bool String_starts_with(const String* string_p, const char* prefix)
 {
-    if (String_is_null(string_obj_p))
+    if (String_is_null(string_p))
     {
-        return Err(NULL, "Uninitialized string.", -1);
+        LOG_ERROR("Trying to check the start of an empty string");
+        return false;
     }
-    printf("String: `");
-    for (size_t i = 0; i < string_obj_p->size; i++)
-    {
-        if (string_obj_p->str[i] == '\0')
-        {
-            printf("<>");
-        }
-        else
-        {
-            printf("%c", string_obj_p->str[i]);
-        }
-    }
-    printf("`\n");
-    printf("Allocated length: `%lu`\n", string_obj_p->length);
-    printf("Displayed version: `");
-    String_print(string_obj_p);
-    printf("`\n");
-    return Ok(NULL);
-}
-
-// TODO: Result_bool - check if is null
-bool String_starts_with(String* string_p, const char* prefix)
-{
     if (strstr(string_p->str, prefix) == string_p->str)
     {
         return true;
@@ -148,18 +97,17 @@ bool String_starts_with(String* string_p, const char* prefix)
     }
 }
 
-Result_void_p String_replace_char(String* string_obj_haystack_p, const char needle,
-                                  const char replace)
+Result_void_p String_replace_char(String* haystack_string_p, const char needle, const char replace)
 {
-    if (String_is_null(string_obj_haystack_p))
+    if (String_is_null(haystack_string_p))
     {
         return Err(NULL, "Uninitialized string.", -1);
     }
-    char tmp_str[string_obj_haystack_p->length + 1];
+    char tmp_str[haystack_string_p->length + 1];
     size_t i = 0, j = 0;
-    while (i < string_obj_haystack_p->length)
+    while (i < haystack_string_p->length)
     {
-        if (string_obj_haystack_p->str[i] == needle)
+        if (haystack_string_p->str[i] == needle)
         {
             if (replace != '\0')
             {
@@ -169,14 +117,127 @@ Result_void_p String_replace_char(String* string_obj_haystack_p, const char need
         }
         else
         {
-            tmp_str[j++] = string_obj_haystack_p->str[i];
+            tmp_str[j++] = haystack_string_p->str[i];
         }
         i++;
     }
     // Terminate.
     tmp_str[j] = '\0';
     // Update the string length in case some chars were removed.
-    string_obj_haystack_p->length = j;
-    strncpy(string_obj_haystack_p->str, tmp_str, j + 1);
+    haystack_string_p->length = j;
+    strncpy(haystack_string_p->str, tmp_str, j + 1);
     return Ok(NULL);
+}
+
+Result_void_p String_replace_pattern(String* haystack_string_p, const char* needle,
+                                     const char* replacement)
+{
+
+    if (String_is_null(haystack_string_p))
+    {
+        return Err(NULL, "Uninitialized string.", ERR_NULL);
+    }
+    if (strlen(needle) == 0)
+    {
+        return Err(NULL, "Empty needle not allowed.", ERR_EMPTY_STRING);
+    }
+    int oldWlen = strlen(needle);
+    int newWlen = strlen(replacement);
+    size_t i;
+    size_t cnt = 0;
+
+    // Counting the number of times old word occur in the string
+    const char* s = haystack_string_p->str;
+    for (i = 0; i < haystack_string_p->length; i++)
+    {
+        if (strstr(&s[i], needle) == &s[i])
+        {
+            cnt++;
+
+            // Jumping to index after the old word.
+            i += oldWlen - 1;
+        }
+    }
+    if (cnt == 0)
+    {
+        LOG_DEBUG("Pattern %s not found", needle);
+        return Ok(NULL);
+    }
+
+    // Making new string of enough length
+    size_t new_string_length = i + cnt * (newWlen - oldWlen);
+    char* result_char_p      = (char*)MALLOC(new_string_length);
+
+    i = 0;
+    while (*s)
+    {
+        // compare the substring with the result
+        if (strstr(s, needle) == s)
+        {
+            strcpy(&result_char_p[i], replacement);
+            i += newWlen;
+            s += oldWlen;
+        }
+        else
+            result_char_p[i++] = *s++;
+    }
+
+    // Update string.
+    if (new_string_length >= haystack_string_p->size)
+    {
+        // Increase the allocated size.
+        haystack_string_p->size = (size_t)(new_string_length * SIZE_FACTOR);
+        haystack_string_p->str  = (char*)REALLOCF(haystack_string_p->str, haystack_string_p->size);
+    }
+    haystack_string_p->length = new_string_length;
+    // Copy an extra byte for the NULL characther.
+    strncpy(haystack_string_p->str, result_char_p, new_string_length + 1);
+    haystack_string_p->str[new_string_length] = 0;
+    FREE(result_char_p);
+    result_char_p = NULL;
+
+    return Ok(NULL);
+}
+
+Result_String_p String_between_patterns_in_char_p(const char* in_char_p, const char* prefix,
+                                                  const char* suffix)
+{
+    String* ret_string_p;
+    if (in_char_p == NULL)
+    {
+        return Err(ret_string_p, "Uninitialized input detected.", ERR_NULL)
+    }
+    else if (strlen(in_char_p) < strlen(prefix) + strlen(suffix))
+    {
+        LOG_DEBUG("Input str length : %lu", strlen(in_char_p));
+        LOG_DEBUG("Prefix length    : %lu", strlen(in_char_p));
+        LOG_DEBUG("Suffix length    : %lu", strlen(in_char_p));
+
+        return Err(ret_string_p, "Input shorter than the input patterns.", ERR_INVALID_INPUT);
+    }
+    char* start = strstr(in_char_p, prefix);
+    if (start == NULL)
+    {
+        return Err(ret_string_p, "Prefix not found in input string", ERR_NOT_FOUND);
+    }
+    start     = start + strlen(prefix);
+    char* end = strstr(start, suffix);
+    if (end == NULL)
+    {
+        return Err(ret_string_p, "Suffix not found in input string", ERR_NOT_FOUND);
+    }
+    char* tmp = (char*)MALLOC(end - start + 1);
+    memcpy(tmp, start, end - start);
+    tmp[end - start] = '\0';
+
+    String* res_string_p = String_new(tmp);
+    FREE(tmp);
+    tmp = NULL;
+    return Ok(res_string_p);
+}
+
+Result_String_p String_between_patterns_in_string_p(String* in_string_p, const char* prefix,
+                                                    const char* suffix)
+{
+    return String_between_patterns_in_char_p(in_string_p->str, prefix, suffix);
 }
