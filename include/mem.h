@@ -3,12 +3,16 @@
 #include "common.h"
 #include <ctype.h>
 #include <stdarg.h>
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #if MEM_ANALYSIS == 1
-void* custom_malloc(size_t, const char*, const int);
-void* custom_reallocf(void*, size_t, const char*, const int);
-int custom_vasprintf(char**, const char*, va_list, const char*, const int);
-void custom_free(void*, const char*, const int);
+    void* custom_malloc(size_t, const char*, const int);
+    void* custom_reallocf(void*, size_t, const char*, const int);
+    int custom_vasprintf(char**, const char*, va_list, const char*, const int);
+    void custom_free(void*, const char*, const int);
 
 #define MALLOC(size) custom_malloc(size, __FILE__, __LINE__)
 #define REALLOCF(ptr, size) custom_reallocf(ptr, size, __FILE__, __LINE__)
@@ -23,5 +27,7 @@ void custom_free(void*, const char*, const int);
 #define FREE(ptr) free(ptr)
 
 #endif
-
+#ifdef __cplusplus
+};
+#endif
 #endif

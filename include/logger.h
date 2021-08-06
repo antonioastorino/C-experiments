@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 // Remove full path from file name.
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -15,12 +19,12 @@
 #define LOG_LEVEL_WARN 2
 #define LOG_LEVEL_ERROR 1
 
-void get_datetime(char*, const size_t);
+    void get_datetime(char*, const size_t);
 
-void init_logger(const char*, const char*);
+    void init_logger(const char*, const char*);
 
-FILE* get_log_out_file();
-FILE* get_log_err_file();
+    FILE* get_log_out_file();
+    FILE* get_log_err_file();
 
 #define CHECK_LOG_LENGTH(args...)                                                                  \
     char log_message[1024];                                                                        \
@@ -107,7 +111,9 @@ FILE* get_log_err_file();
 #endif
 
 #if TEST == 1
-void test_logger(void);
+    void test_logger(void);
 #endif
-
+#ifdef __cplusplus
+};
+#endif
 #endif
