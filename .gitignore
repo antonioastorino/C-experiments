@@ -5,3 +5,4 @@ prj-out-*
 *.bak
 *.log
 test/artifacts/*
+.DS_Store

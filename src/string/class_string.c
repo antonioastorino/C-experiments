@@ -45,6 +45,27 @@ String* String_new(const char* format, ...)
     return out_string_obj_p;
 }
 
+// The array must end with a NULL value.
+String* String_join(const char** char_array, const char* joint)
+{
+    if (!char_array || !char_array[0])
+    {
+        LOG_ERROR("Please provide a valid input array.");
+        return (String*)NULL;
+    }
+    const char** curr_element = char_array;
+    String* ret_string_p      = String_new(*curr_element);
+    while (*(curr_element + 1) != NULL)
+    {
+        // TODO: Use String_renew() instead.
+        String* new_ret_string_p
+            = String_new("%s%s%s", ret_string_p->str, joint, *(++curr_element));
+        String_destroy(ret_string_p);
+        ret_string_p = new_ret_string_p;
+    }
+    return ret_string_p;
+}
+
 String* String_clone(const String* origin) { return String_new(origin->str); }
 
 void String_destroy(String* string_obj_p)
@@ -97,18 +118,33 @@ bool String_starts_with(const String* string_p, const char* prefix)
     }
 }
 
-Result_void_p String_replace_char(String* haystack_string_p, const char needle, const char replace)
+bool String_match(const String* a_string_p, const String* b_string_p)
+{
+    if (a_string_p == NULL || b_string_p == NULL)
+    {
+        LOG_WARN("Input strings should not be NULL");
+        return false;
+    }
+    if (strcmp(a_string_p->str, b_string_p->str))
+    {
+        return false;
+    }
+    return true;
+}
+
+Result_size_t String_replace_char(String* haystack_string_p, const char needle, const char replace)
 {
     if (String_is_null(haystack_string_p))
     {
-        return Err(NULL, "Uninitialized string.", -1);
+        return Err((size_t)0, "Uninitialized string.", -1);
     }
     char tmp_str[haystack_string_p->length + 1];
-    size_t i = 0, j = 0;
+    size_t i = 0, j = 0, cnt = 0;
     while (i < haystack_string_p->length)
     {
         if (haystack_string_p->str[i] == needle)
         {
+            cnt++;
             if (replace != '\0')
             {
                 // Replace the current char with that provided.
@@ -126,20 +162,50 @@ Result_void_p String_replace_char(String* haystack_string_p, const char needle, 
     // Update the string length in case some chars were removed.
     haystack_string_p->length = j;
     strncpy(haystack_string_p->str, tmp_str, j + 1);
-    return Ok(NULL);
+    return Ok(cnt);
 }
 
-Result_void_p String_replace_pattern(String* haystack_string_p, const char* needle,
+Result_size_t String_replace_pattern_size_t(String* haystack_string_p, const char* needle,
+                                            const char* format, size_t replacement)
+{
+    String* replacement_string_p = String_new(format, replacement);
+    Result_size_t ret_result
+        = String_replace_pattern(haystack_string_p, needle, replacement_string_p->str);
+    String_destroy(replacement_string_p);
+    return ret_result;
+}
+
+Result_size_t String_replace_pattern_float(String* haystack_string_p, const char* needle,
+                                           const char* format, float replacement)
+{
+    String* replacement_string_p = String_new(format, replacement);
+    Result_size_t ret_result
+        = String_replace_pattern(haystack_string_p, needle, replacement_string_p->str);
+    String_destroy(replacement_string_p);
+    return ret_result;
+}
+
+Result_size_t String_replace_pattern_int(String* haystack_string_p, const char* needle,
+                                         const char* format, int replacement)
+{
+    String* replacement_string_p = String_new(format, replacement);
+    Result_size_t ret_result
+        = String_replace_pattern(haystack_string_p, needle, replacement_string_p->str);
+    String_destroy(replacement_string_p);
+    return ret_result;
+}
+
+Result_size_t String_replace_pattern(String* haystack_string_p, const char* needle,
                                      const char* replacement)
 {
 
     if (String_is_null(haystack_string_p))
     {
-        return Err(NULL, "Uninitialized string.", ERR_NULL);
+        return Err((size_t)0, "Uninitialized string.", ERR_NULL);
     }
     if (strlen(needle) == 0)
     {
-        return Err(NULL, "Empty needle not allowed.", ERR_EMPTY_STRING);
+        return Err((size_t)0, "Empty needle not allowed.", ERR_EMPTY_STRING);
     }
     int oldWlen = strlen(needle);
     int newWlen = strlen(replacement);
@@ -161,12 +227,13 @@ Result_void_p String_replace_pattern(String* haystack_string_p, const char* need
     if (cnt == 0)
     {
         LOG_DEBUG("Pattern %s not found", needle);
-        return Ok(NULL);
+        return Ok((size_t)0);
     }
 
     // Making new string of enough length
-    size_t new_string_length = i + cnt * (newWlen - oldWlen);
-    char* result_char_p      = (char*)MALLOC(new_string_length);
+    size_t new_string_length         = i + cnt * (newWlen - oldWlen);
+    char* result_char_p              = (char*)MALLOC(new_string_length + 1);
+    result_char_p[new_string_length] = 0;
 
     i = 0;
     while (*s)
@@ -196,7 +263,7 @@ Result_void_p String_replace_pattern(String* haystack_string_p, const char* need
     FREE(result_char_p);
     result_char_p = NULL;
 
-    return Ok(NULL);
+    return Ok(cnt);
 }
 
 Result_String_p String_between_patterns_in_char_p(const char* in_char_p, const char* prefix,

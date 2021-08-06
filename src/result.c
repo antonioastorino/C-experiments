@@ -8,7 +8,7 @@
     Result_##suffix Ok_##suffix(ret_type value)                                                    \
     {                                                                                              \
         ReturnValue ok;                                                                            \
-        Error err           = {.message = "", .code = 0};                                          \
+        Error err           = {.message = "", .code = ERR_ALL_GOOD};                               \
         ok.ret_##suffix     = value;                                                               \
         Result_##suffix res = {                                                                    \
             .is_err = false,                                                                       \
@@ -47,6 +47,8 @@
     }
 
 RESULT_TYPE_c(int, int);
+RESULT_TYPE_c(size_t, size_t);
+RESULT_TYPE_c(bool, bool);
 RESULT_TYPE_c(float, float);
 RESULT_TYPE_c(char_p, const char*);
 RESULT_TYPE_c(String_p, String*);

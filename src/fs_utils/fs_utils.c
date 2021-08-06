@@ -61,8 +61,7 @@ Result_void_p fs_utils_mkdir_p(const char* dir_path_char_p, mode_t permission)
     LOG_TRACE("Trying to create `%s`", dir_path_char_p);
     if (fs_utils_does_exist(dir_path_char_p))
     {
-        LOG_TRACE("The folder already exists.");
-        return Ok(NULL);
+        return Err(NULL, "The folder already exists.", ERR_FOLDER_EXISTS);
     }
     char partial_path[path_length + 1];
     size_t start_index = 0;
@@ -122,10 +121,10 @@ Result_void_p fs_utils_rmdir(const char* dir_path_char_p)
 }
 
 /* ------------------------------------------- Files -------------------------------------------- */
-Result_void_p fs_utils_rm_from_path_as_char_p(const char* file_path_as_char_p)
+Result_void_p fs_utils_rm_from_path_as_char_p(const char* file_path_char_p)
 {
     Result_void_p result = Ok(NULL);
-    char* paths[2]       = {(char*)file_path_as_char_p, NULL};
+    char* paths[2]       = {(char*)file_path_char_p, NULL};
     // Create the received path handle.
     FTS* fts_p = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, NULL);
     if (fts_p == NULL)
@@ -140,7 +139,7 @@ Result_void_p fs_utils_rm_from_path_as_char_p(const char* file_path_as_char_p)
     if (dir_entry_p->fts_info & FTS_F)
     {
         // It is a file.
-        if (unlink(file_path_as_char_p))
+        if (unlink(file_path_char_p))
         {
             LOG_TRACE("Removal failed with errno: %d.", errno);
             result = Err(NULL, "Could not remove file.", errno);
@@ -149,20 +148,46 @@ Result_void_p fs_utils_rm_from_path_as_char_p(const char* file_path_as_char_p)
     else
     {
         // It is a folder.
-        result = fs_utils_rmdir(file_path_as_char_p);
+        result = fs_utils_rmdir(file_path_char_p);
     }
     fts_close(fts_p);
     RET_ON_ERR(NULL, result)
-    LOG_TRACE("`%s` successfully deleted.", file_path_as_char_p);
+    LOG_TRACE("`%s` successfully deleted.", file_path_char_p);
     return result;
 }
 
-Result_String_p fs_utils_read_to_string_from_path_as_char_p(const char* file_path_as_char_p)
+Result_void_p fs_utils_append(const char* file_path_char_p, const char* new_content_char_p)
 {
-    String* ret_string_p;
-    FILE* file_handler = fopen(file_path_as_char_p, "r");
+    FILE* file_handler = fopen(file_path_char_p, "a");
     if (!file_handler)
     {
+        return Err(NULL, "Failed to open file.", ERR_NULL);
+    }
+    fprintf(file_handler, "%s", new_content_char_p);
+    fclose(file_handler);
+    return Ok(NULL);
+}
+
+Result_void_p fs_utils_create_with_content(const char* file_path_char_p,
+                                           const char* new_content_char_p)
+{
+    FILE* file_handler = fopen(file_path_char_p, "w");
+    if (!file_handler)
+    {
+        return Err(NULL, "Failed to open file.", ERR_NULL);
+    }
+    fprintf(file_handler, "%s", new_content_char_p);
+    fclose(file_handler);
+    return Ok(NULL);
+}
+
+Result_String_p _fs_utils_read_to_string(const char* file_path_char_p)
+{
+    String* ret_string_p;
+    FILE* file_handler = fopen(file_path_char_p, "r");
+    if (!file_handler)
+    {
+        LOG_ERROR("Failed to open `%s`", file_path_char_p);
         return Err(ret_string_p, "Failed to open file.", ERR_NULL);
     }
     int c;

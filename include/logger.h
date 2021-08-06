@@ -1,9 +1,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
-#include "class_string.h"
 #include "common.h"
-
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
 // Remove full path from file name.

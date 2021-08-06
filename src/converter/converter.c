@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Result_int str_to_int(char* str)
+Result_int str_to_int(const char* str)
 {
     int ret_int = 0;
     int sign    = 1;
@@ -40,7 +40,37 @@ Result_int str_to_int(char* str)
     return Ok(ret_int * sign);
 }
 
-Result_float str_to_float(char* str)
+Result_size_t str_to_size_t(const char* str)
+{
+    size_t ret_size_t = 0;
+    if (str == NULL)
+    {
+        return Err(ret_size_t, "Null pointer found", ERR_NULL);
+    }
+    if (str[0] == '+')
+    {
+        str++;
+    }
+    if (str[0] == '\0')
+    {
+        return Err(ret_size_t, "Cannot convert the provided string into a size_t",
+                   ERR_PARSE_STRING_TO_LONG_INT);
+    }
+    while (*str != '\0')
+    {
+        if ((*str < '0') || (*str > '9'))
+        {
+            char error_message[256];
+            sprintf(error_message, "Cannot convert string containing `%c`", *str);
+            return Err(ret_size_t, error_message, ERR_PARSE_STRING_TO_LONG_INT);
+        }
+        ret_size_t = ret_size_t * 10 + (*str - '0');
+        str++;
+    }
+    return Ok(ret_size_t);
+}
+
+Result_float str_to_float(const char* str)
 {
     float ret_float = 0.0f;
     int sign        = 1;
@@ -97,4 +127,35 @@ Result_float str_to_float(char* str)
         str++;
     }
     return Ok(ret_float * sign * multiplier);
+}
+
+float rounder(float to_be_rounded, float step, size_t num_of_decimals)
+{
+    int to_be_rounded_int;
+    int step_int;
+    for (size_t i = 0; i < num_of_decimals; i++)
+    {
+        to_be_rounded *= 10.0f;
+        step *= 10.0f;
+    }
+    to_be_rounded_int = (int)to_be_rounded;
+    step_int          = (int)step;
+
+    int remainder = to_be_rounded_int % step_int;
+    int adjuster;
+    if (to_be_rounded > 0)
+    {
+        adjuster = (float)remainder / step > 0.5 ? step_int : (int)0;
+    }
+    else
+    {
+        adjuster = (float)remainder / step < -0.5 ? -step_int : (int)0;
+    }
+    int quotient_int     = (to_be_rounded_int / step_int) * step_int + adjuster;
+    float quotient_float = (float)quotient_int;
+    for (size_t i = 0; i < num_of_decimals; i++)
+    {
+        quotient_float /= 10.0f;
+    }
+    return quotient_float;
 }

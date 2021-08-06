@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     test_class_json();
 
 #else
-    String* my_string = unwrap(String_new("Hello world!"));
+    String* my_string = String_new("Hello world!");
     String_println((const String*)my_string);
     String_destroy(my_string);
 
