@@ -4,14 +4,14 @@ Unit test and return values resembling Rust style.
 ## List of implemented modules
 * `class_string` - a class-like module implementing
 	* String_new              (create a string struct using a C formatter)
-        * String_join             (equivalient to `.join("<something>")` in other languages)
-    	* String_destroy          (free memory allocated by a String struct)
-        * String_starts_with
-    	* String_between_patterns (returns the string between two specified patterns)
-    	* String_replace_char
-    	* String_replace_pattern
-    	* String_replace_pattern_with_format (generic for replacing a pattern with any primitive type with a specific format)
-    	* ...
+	* String_join             (equivalient to `.join("<something>")` in other languages)
+	* String_destroy          (free memory allocated by a String struct)
+	* String_starts_with
+	* String_between_patterns (returns the string between two specified patterns)
+	* String_replace_char
+	* String_replace_pattern
+	* String_replace_pattern_with_format (generic for replacing a pattern with any primitive type with a specific format)
+	* ...
 * `class_json` - a simple JSON parser performing
 	* JsonObj_new        (conversion from a JSON string to an instance of the JSON "class")
 	* JsonObj_destroy    (free memory allocated by JsonObj_new)
