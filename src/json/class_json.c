@@ -565,7 +565,6 @@ void test_class_json()
     JsonArray* json_array;   // Hold objects of type JsonArray.
     JsonArray* json_array_2; // Hold objects of type JsonArray.
     const char* json_char_p;
-    bool missing_entry = false;
     Result_void_p res_void_p;
 
     PRINT_TEST_TITLE("Key-value pair");

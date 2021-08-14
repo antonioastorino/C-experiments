@@ -1,4 +1,5 @@
 #include "class_string.h"
+#include "common.h"
 #include "logger.h"
 #include "mem.h"
 #include <errno.h>

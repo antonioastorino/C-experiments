@@ -4,11 +4,6 @@
 #include "converter.h"
 #include "fs_utils.h"
 #include "logger.h"
-#include "result.h"
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int main(int argc, char** argv)
 {
@@ -16,9 +11,14 @@ int main(int argc, char** argv)
     {
         fprintf(stderr, "Parameters not supported");
     }
-    printf("Hello from `main`\n");
+    printf("Hello from `main-test`\n");
     printf("You are running this program from `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
 
+    test_fs_utils();
+    test_logger();
+    test_class_string();
+    test_converter();
+    test_class_json();
     return 0;
 }

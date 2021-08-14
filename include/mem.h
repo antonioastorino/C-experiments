@@ -2,7 +2,6 @@
 #define MEM_H
 #include "common.h"
 #include <ctype.h>
-#include <stdarg.h>
 #ifdef __cplusplus
 extern "C"
 {

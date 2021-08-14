@@ -7,7 +7,7 @@
 void test_logger()
 {
     PRINT_BANNER();
-
+    PRINT_TEST_TITLE("Logging at any level.");
     LOG_TRACE("Test")
     LOG_TRACE("Test with format %d", 23)
     LOG_TRACE("Test with format %d %s", 23, "Hello")
@@ -15,6 +15,7 @@ void test_logger()
     LOG_INFO("Test")
     LOG_WARN("Test")
     LOG_ERROR("Test")
+    PRINT_TEST_TITLE("Logging too long string.");
     LOG_ERROR(
         "Text too long - Text too long - Text too long - Text too long - Text too long - Text too "
         "long - Text too long - Text too long - Text too long - Text too long - Text too long - "

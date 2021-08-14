@@ -1,4 +1,5 @@
 #include "fs_utils.h"
+#include "common.h"
 #include "logger.h"
 #include "mem.h"
 #include <errno.h>
