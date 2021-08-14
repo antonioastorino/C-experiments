@@ -8,9 +8,9 @@
 extern "C"
 {
 #endif
-#define TEST 0
+#define TEST 1
 #define LOG_LEVEL 5
-#define MEM_ANALYSIS 0
+#define MEM_ANALYSIS 1
 // ---------------------------------- //
 #include <stdio.h>
 #include <string.h>

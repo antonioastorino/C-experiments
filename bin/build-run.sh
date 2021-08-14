@@ -8,20 +8,40 @@ if [ -z $APP_NAME ]; then exit 1; fi
 MODE="$1"
 MODE=${MODE:u}
 
+function analyze_logs() {
+    echo " Log analysis started."
+    RET_VAL=$1
+    if [ ${RET_VAL} -ne 0 ]; then
+        echo -e "\n\n\e[31mFAIL\e[0m - Execution interrupted with error code ${RET_VAL}.\n\n"
+        exit ${RET_VAL}
+    fi
+    if [ -f "${LOG_FILE_ERR}" ]; then
+        if [ "$(cat ${LOG_FILE_ERR})" = "" ]; then
+            echo -e "\n\e[32mSUCCESS\e[0m - All tests passed.\n\n"
+        else
+            echo -e "\n\e[31mFAIL\e[0m - The content of ${LOG_FILE_ERR} follows.\n\n"
+            cat "${LOG_FILE_ERR}"
+        fi
+    else
+        echo -e "\n\n\e[31mApplication not run.\e[0m\n\n"
+    fi
+    echo " Log analysis completed."
+}
+
 function analyze_mem() {
-    echo "Memory report analysis started."
+    echo " Memory report analysis started."
     echo
     if [ $(ls /tmp/pointers | wc -l) -ne 0 ]; then
         echo "\e[33mFAIL:\e[0m Memory leak detected."
         for f in $(ls /tmp/pointers); do
-            echo "$f - `cat /tmp/pointers/$f`"
+            echo "$f - $(cat /tmp/pointers/$f)"
         done
     else
-        echo "\e[32mSUCCESS:\e[0m No memory leak detected."
+        echo "\e[32mSUCCESS\e[0m - No memory leak detected."
     fi
     set -e
     echo
-    echo "Memory report analysis completed."
+    echo " Memory report analysis completed."
 }
 
 pushd "${BD}"
@@ -62,21 +82,9 @@ if [ "${MODE}" = "TEST" ] || [ "${MODE}" = "DEBUG" ]; then
         RET_VAL=$?
         echo ""
         echo "================================================================================"
-        if [ ${RET_VAL} -ne 0 ]; then
-            echo -e "\n\n\e[31mFAIL\e[0m - Execution interrupted with error code ${RET_VAL}.\n\n"
-            exit ${RET_VAL}
-        fi
-        if [ -f "${LOG_FILE_ERR}" ]; then
-            if [ "$(cat ${LOG_FILE_ERR})" = "" ]; then
-                echo -e "\n\e[32mSUCCESS\e[0m - All tests passed.\n\n"
-            else
-                echo -e "\n\e[31mFAIL\e[0m - The content of ${LOG_FILE_ERR} follows.\n\n"
-                cat "${LOG_FILE_ERR}"
-            fi
-        else
-            echo -e "\n\n\e[31mApplication not run.\e[0m\n\n"
-        fi
-        analyze_mem 
+        analyze_logs ${RET_VAL}
+        echo "================================================================================"
+        analyze_mem
     else
         lldb ./build/"${APP_NAME}-test"
     fi

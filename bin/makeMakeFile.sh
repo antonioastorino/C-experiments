@@ -70,7 +70,7 @@ while read -r folder; do # created -I list
 done <header-sorted-dir.list
 
 # Phony recipies
-pf "\n.PHONY: all clean setup"
+pf "\n.PHONY: all setup"
 pf "\n"
 
 # All
