@@ -1,4 +1,5 @@
 #include "logger.h"
+#include "common.h"
 #include <stdlib.h>
 
 #if LOG_LEVEL > 0
@@ -39,4 +40,34 @@ void init_logger(const char* log_out_file_path_str, const char* log_err_file_pat
     }
 }
 
+#if TEST == 1
+void test_logger()
+{
+    PRINT_BANNER();
+    PRINT_TEST_TITLE("Logging at any level.");
+    LOG_TRACE("Test")
+    LOG_TRACE("Test with format %d", 23)
+    LOG_TRACE("Test with format %d %s", 23, "Hello")
+    LOG_DEBUG("Test")
+    LOG_INFO("Test")
+    LOG_WARN("Test")
+    LOG_ERROR("Test")
+    PRINT_TEST_TITLE("Logging too long string.");
+    LOG_ERROR(
+        "Text too long - Text too long - Text too long - Text too long - Text too long - Text too "
+        "long - Text too long - Text too long - Text too long - Text too long - Text too long - "
+        "Text too long - Text too long - Text too long - Text too long - Text too long - Text too "
+        "long - Text too long - Text too long - Text too long - Text too long - Text too long - "
+        "Text too long - Text too long - Text too long - Text too long - Text too long - Text too "
+        "long - Text too long - Text too long - Text too long - Text too long - Text too long - "
+        "Text too long - Text too long - Text too long - Text too long - Text too long - Text too "
+        "long - Text too long - Text too long - Text too long - Text too long - Text too long - "
+        "Text too long - Text too long - Text too long - Text too long - Text too long - Text too "
+        "long - Text too long - Text too long - Text too long - Text too long - Text too long - "
+        "Text too long - Text too long - Text too long - Text too long - Text too long - Text too "
+        "long - Text too long - Text too long - Text too long - Text too long - Text too long - "
+        "Text too long - Text too long - Text too long - Text too long - ")
+    printf("All good.\n");
+}
+#endif
 #endif
