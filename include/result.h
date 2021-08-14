@@ -15,7 +15,7 @@ extern "C"
     typedef union
     {
         int ret_int;
-        size_t ret_size_t;
+        size_t ret_uint;
         bool ret_bool;
         float ret_float;
         const char* ret_char_p;
@@ -43,7 +43,7 @@ extern "C"
     ret_type unwrap_##suffix(Result_##suffix);
 
     RESULT_TYPE_h(int, int);
-    RESULT_TYPE_h(size_t, size_t);
+    RESULT_TYPE_h(uint, size_t);
     RESULT_TYPE_h(float, float);
     RESULT_TYPE_h(bool, bool);
     RESULT_TYPE_h(char_p, const char*);
@@ -55,7 +55,7 @@ extern "C"
 #define Ok(ret_value)                            \
     _Generic(ret_value,                          \
         int         : Ok_int,                    \
-        size_t      : Ok_size_t,                 \
+        size_t      : Ok_uint,                 \
         bool        : Ok_bool,                   \
         float       : Ok_float,                  \
         const char* : Ok_char_p,                 \
@@ -67,7 +67,7 @@ extern "C"
 #define Err(type, message, code)                 \
     _Generic(type,                               \
         int         : Err_int,                   \
-        size_t      : Err_size_t,                \
+        size_t      : Err_uint,                \
         bool        : Err_bool,                  \
         float       : Err_float,                 \
         const char* : Err_char_p,                \
@@ -80,7 +80,7 @@ extern "C"
 #define unwrap(ret_value)                        \
     _Generic((ret_value),                        \
         Result_int       : unwrap_int,           \
-        Result_size_t    : unwrap_size_t,        \
+        Result_uint    : unwrap_uint,        \
         Result_bool      : unwrap_bool,          \
         Result_float     : unwrap_float,         \
         Result_char_p    : unwrap_char_p,        \
@@ -92,7 +92,7 @@ extern "C"
 #define unwrap_err(ret_value)                    \
     _Generic((ret_value),                        \
         Result_int       : unwrap_err_int,       \
-        Result_size_t    : unwrap_err_size_t,    \
+        Result_uint    : unwrap_err_uint,    \
         Result_bool      : unwrap_err_bool,      \
         Result_float     : unwrap_err_float,     \
         Result_char_p    : unwrap_err_char_p,    \
@@ -102,13 +102,13 @@ extern "C"
      )(ret_value)
     // clang-format on
 
-#define RET_ON_ERR(ret_type, result)                                                               \
-    if (result.err.code)                                                                           \
+#define RETURN_ON_ERROR(ret_type, result)                                                          \
+    if (result.is_err)                                                                             \
     {                                                                                              \
         return Err(ret_type, result.err.message, result.err.code);                                 \
     }
-#define IS_OK(result) (result.err.code == ERR_ALL_GOOD)
-#define IS_ERR(result) (result.err.code != ERR_ALL_GOOD)
+#define IS_OK(result) (!result.is_err)
+#define IS_ERR(result) (result.is_err)
 
 #ifdef __cplusplus
 };

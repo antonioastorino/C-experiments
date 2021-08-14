@@ -30,7 +30,7 @@ extern "C"
     {
         VALUE_UNDEFINED,
         VALUE_INT,
-        VALUE_SIZE_T,
+        VALUE_UINT,
         VALUE_FLOAT,
         VALUE_STR,
         VALUE_ARRAY,
@@ -69,7 +69,7 @@ extern "C"
         union
         {
             int value_int;                   // leaf int
-            size_t value_size_t;             // leaf size_t
+            size_t value_uint;               // leaf size_t
             float value_float;               // leaf float
             const char* value_char_p;        // leaf c-string
             struct JsonItem* value_child_p;  // another item
@@ -109,46 +109,49 @@ extern "C"
 #define GET_NUMBER_h(suffix, out_type)                                                             \
     Result_void_p get_##suffix(const JsonItem*, const char*, out_type);
     GET_VALUE_h(value_int, int*);
-    GET_VALUE_h(value_size_t, size_t*);
+    GET_VALUE_h(value_uint, size_t*);
     GET_VALUE_h(value_float, float*);
 
 #define GET_ARRAY_VALUE_h(suffix, out_type)                                                        \
     Result_void_p get_array_##suffix(const JsonArray*, size_t, out_type);
     GET_ARRAY_VALUE_h(value_char_p, const char**);
     GET_ARRAY_VALUE_h(value_int, int*);
-    GET_ARRAY_VALUE_h(value_size_t, size_t*);
+    GET_ARRAY_VALUE_h(value_uint, size_t*);
     GET_ARRAY_VALUE_h(value_float, float*);
     GET_ARRAY_VALUE_h(value_child_p, JsonItem**);
 
 // clang-format off
-#define JsonObj_new(in_json)                                     \
-    _Generic(in_json,                                            \
-        const char*  : JsonObj_new_from_char_p,                  \
-        String*      : JsonObj_new_from_string_p                 \
+#define JsonObj_new(in_json)                                                                       \
+    _Generic(in_json,                                                                              \
+        const char*  : JsonObj_new_from_char_p,                                                    \
+        String*      : JsonObj_new_from_string_p                                                   \
         )(in_json)
 
-#define Json_get(json_stuff, needle, out_p)                    \
-    _Generic ((json_stuff),                                         \
-        JsonItem*: _Generic((out_p),                                \
-            const char** : get_value_char_p,                         \
-            int* : get_value_int,                                    \
-            size_t* : get_value_size_t,                                    \
-            float* : get_value_float,                                \
-            JsonItem** : get_value_child_p,                          \
-            JsonArray** : get_value_array_p                          \
-            ),                                                          \
-        JsonArray*: _Generic((out_p),                                  \
-            const char** : get_array_value_char_p,                   \
-            int*         : get_array_value_int,                      \
-            size_t*      : get_array_value_size_t,                      \
-            float*       : get_array_value_float,                    \
-            JsonItem**   : get_array_value_child_p,                   \
-            JsonArray**  : invalid_request                   \
-            )                                           \
+#define Json_get(json_stuff, needle, out_p)                                                        \
+    _Generic ((json_stuff),                                                                        \
+        JsonItem*: _Generic((out_p),                                                               \
+            const char** : get_value_char_p,                                                       \
+            int* : get_value_int,                                                                  \
+            size_t* : get_value_uint,                                                              \
+            float* : get_value_float,                                                              \
+            JsonItem** : get_value_child_p,                                                        \
+            JsonArray** : get_value_array_p                                                        \
+            ),                                                                                     \
+        JsonArray*: _Generic((out_p),                                                              \
+            const char** : get_array_value_char_p,                                                 \
+            int*         : get_array_value_int,                                                    \
+            size_t*      : get_array_value_uint,                                                   \
+            float*       : get_array_value_float,                                                  \
+            JsonItem**   : get_array_value_child_p,                                                \
+            JsonArray**  : invalid_request                                                         \
+            )                                                                                      \
         )(json_stuff, needle, out_p)
 
 
-#endif
 #if TEST == 1
-void test_class_json(void);
+    void test_class_json(void);
+#endif
+#ifdef __cplusplus
+};
+#endif
 #endif

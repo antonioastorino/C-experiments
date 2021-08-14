@@ -95,7 +95,7 @@ Result_void_p String_print(const String* string_obj_p)
 Result_void_p String_println(const String* string_obj_p)
 {
     Result_void_p result = String_print(string_obj_p);
-    RET_ON_ERR(NULL, result);
+    RETURN_ON_ERROR(NULL, result);
     printf("\n");
     return result;
 }
@@ -132,7 +132,7 @@ bool String_match(const String* a_string_p, const String* b_string_p)
     return true;
 }
 
-Result_size_t String_replace_char(String* haystack_string_p, const char needle, const char replace)
+Result_uint String_replace_char(String* haystack_string_p, const char needle, const char replace)
 {
     if (String_is_null(haystack_string_p))
     {
@@ -165,38 +165,38 @@ Result_size_t String_replace_char(String* haystack_string_p, const char needle, 
     return Ok(cnt);
 }
 
-Result_size_t String_replace_pattern_size_t(String* haystack_string_p, const char* needle,
-                                            const char* format, size_t replacement)
+Result_uint String_replace_pattern_uint(String* haystack_string_p, const char* needle,
+                                        const char* format, size_t replacement)
 {
     String* replacement_string_p = String_new(format, replacement);
-    Result_size_t ret_result
+    Result_uint ret_result
         = String_replace_pattern(haystack_string_p, needle, replacement_string_p->str);
     String_destroy(replacement_string_p);
     return ret_result;
 }
 
-Result_size_t String_replace_pattern_float(String* haystack_string_p, const char* needle,
-                                           const char* format, float replacement)
+Result_uint String_replace_pattern_float(String* haystack_string_p, const char* needle,
+                                         const char* format, float replacement)
 {
     String* replacement_string_p = String_new(format, replacement);
-    Result_size_t ret_result
+    Result_uint ret_result
         = String_replace_pattern(haystack_string_p, needle, replacement_string_p->str);
     String_destroy(replacement_string_p);
     return ret_result;
 }
 
-Result_size_t String_replace_pattern_int(String* haystack_string_p, const char* needle,
-                                         const char* format, int replacement)
+Result_uint String_replace_pattern_int(String* haystack_string_p, const char* needle,
+                                       const char* format, int replacement)
 {
     String* replacement_string_p = String_new(format, replacement);
-    Result_size_t ret_result
+    Result_uint ret_result
         = String_replace_pattern(haystack_string_p, needle, replacement_string_p->str);
     String_destroy(replacement_string_p);
     return ret_result;
 }
 
-Result_size_t String_replace_pattern(String* haystack_string_p, const char* needle,
-                                     const char* replacement)
+Result_uint String_replace_pattern(String* haystack_string_p, const char* needle,
+                                   const char* replacement)
 {
 
     if (String_is_null(haystack_string_p))
@@ -312,7 +312,6 @@ Result_String_p String_between_patterns_in_string_p(String* in_string_p, const c
 #if TEST == 1
 void test_class_string()
 {
-    Result_void_p res_void;
     size_t num_of_replacements;
     String* test_string_p;
     PRINT_BANNER();
@@ -475,11 +474,6 @@ void test_class_string()
               "Pattern not found");
     ASSERT_EQ(num_of_replacements, 0, "Number of replacements counted correctly.");
     String_destroy(test_string_p);
-
-    PRINT_TEST_TITLE("Trying to join a null pointer array");
-    const char** null_ptr = NULL;
-    test_string_p         = String_join(null_ptr, "hello");
-    ASSERT_EQ(test_string_p == NULL, true, "No string created");
 
     PRINT_TEST_TITLE("Trying to join an empty array");
     const char* char_array[] = {NULL};

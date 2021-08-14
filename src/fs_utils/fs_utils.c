@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-// Private.
+
 Result_void_p recursive_rm_r(FTS*, const char*);
 
 bool fs_utils_does_exist(const char* p_path)
@@ -83,7 +83,7 @@ Result_void_p fs_utils_mkdir_p(const char* dir_path_char_p, mode_t permission)
             if (!fs_utils_does_exist(partial_path))
             {
                 result = fs_utils_mkdir(partial_path, permission);
-                RET_ON_ERR(NULL, result)
+                RETURN_ON_ERROR(NULL, result)
             }
         }
         // Append path chars to partial_path
@@ -96,7 +96,7 @@ Result_void_p fs_utils_mkdir_p(const char* dir_path_char_p, mode_t permission)
     if (dir_path_char_p[path_length - 1] != '/')
     {
         result = fs_utils_mkdir(dir_path_char_p, permission);
-        RET_ON_ERR(NULL, result)
+        RETURN_ON_ERROR(NULL, result)
     }
     LOG_TRACE("`%s` successfully created.", dir_path_char_p);
     return Ok(NULL);
@@ -151,7 +151,7 @@ Result_void_p fs_utils_rm_from_path_as_char_p(const char* file_path_char_p)
         result = fs_utils_rmdir(file_path_char_p);
     }
     fts_close(fts_p);
-    RET_ON_ERR(NULL, result)
+    RETURN_ON_ERROR(NULL, result)
     LOG_TRACE("`%s` successfully deleted.", file_path_char_p);
     return result;
 }
@@ -248,7 +248,7 @@ Result_void_p recursive_rm_r(FTS* fts_p, const char* dir_path_char_p)
             // Do your recursion thing.
             result = recursive_rm_r(fts_p, child_path_string->str);
             String_destroy(child_path_string);
-            RET_ON_ERR(NULL, result)
+            RETURN_ON_ERROR(NULL, result)
             // Go to the next entry.
             link = link->fts_link;
         }
@@ -258,7 +258,7 @@ Result_void_p recursive_rm_r(FTS* fts_p, const char* dir_path_char_p)
     {
         LOG_TRACE("Trying to delete folder `%s`", dir_path_char_p);
         result = fs_utils_rmdir(dir_path_char_p);
-        RET_ON_ERR(NULL, result)
+        RETURN_ON_ERROR(NULL, result)
     }
     else if (dir_entry_p->fts_info & FTS_F)
     {
@@ -292,11 +292,12 @@ Result_void_p fs_utils_rm_r(const char* p_string_dir_path)
     // Start deleting recursively.
     result = recursive_rm_r(fts_p, p_string_dir_path);
     fts_close(fts_p);
-    RET_ON_ERR(NULL, result)
+    RETURN_ON_ERROR(NULL, result)
 
     LOG_INFO("`%s` successfully deleted.", p_string_dir_path);
     return result;
 }
+
 #if TEST == 1
 void test_fs_utils()
 {

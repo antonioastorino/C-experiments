@@ -37,11 +37,11 @@ extern "C"
     bool String_match(const String*, const String*);
 
     /**************************************** Modifiers *******************************************/
-    Result_size_t String_replace_char(String*, const char, const char);
-    Result_size_t String_replace_pattern(String*, const char*, const char*);
-    Result_size_t String_replace_pattern_size_t(String*, const char*, const char*, size_t);
-    Result_size_t String_replace_pattern_float(String*, const char*, const char*, float);
-    Result_size_t String_replace_pattern_int(String*, const char*, const char*, int);
+    Result_uint String_replace_char(String*, const char, const char);
+    Result_uint String_replace_pattern(String*, const char*, const char*);
+    Result_uint String_replace_pattern_uint(String*, const char*, const char*, size_t);
+    Result_uint String_replace_pattern_float(String*, const char*, const char*, float);
+    Result_uint String_replace_pattern_int(String*, const char*, const char*, int);
 
 // clang-format off
 #define String_between_patterns(in_value, prefix, suffix) \
@@ -52,7 +52,7 @@ extern "C"
 
 #define String_replace_pattern_with_format(haystack, needle, format, replacement) \
     _Generic((replacement), \
-    size_t: String_replace_pattern_size_t, \
+    size_t: String_replace_pattern_uint, \
     float: String_replace_pattern_float, \
     int: String_replace_pattern_int \
     )(haystack, needle, format, replacement)

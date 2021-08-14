@@ -92,7 +92,6 @@ char* terminate_str(char* char_p)
 
 String* generate_tokens(String* json_string_p)
 {
-    String* ret_tokens_string_p;
     char ret_tokens_char_p[json_string_p->length];
 
     size_t pos_out     = 0;
@@ -213,12 +212,12 @@ void deserialize(JsonItem* curr_item_p, char** start_pos_p)
             else
             {
                 // Convert any positive value into a size_t.
-                Result_size_t parsed_size_t = str_to_size_t(num_buff);
-                if (!parsed_size_t.is_err)
+                Result_uint parsed_uint = str_to_uint(num_buff);
+                if (!parsed_uint.is_err)
                 {
-                    curr_item_p->value->value_type   = VALUE_SIZE_T;
-                    curr_item_p->value->value_size_t = unwrap(parsed_size_t);
-                    LOG_TRACE("Found value %lu", curr_item_p->value->value_size_t);
+                    curr_item_p->value->value_type = VALUE_UINT;
+                    curr_item_p->value->value_uint = unwrap(parsed_uint);
+                    LOG_TRACE("Found value %lu", curr_item_p->value->value_uint);
                 }
             }
             break;
@@ -321,8 +320,6 @@ Result_JsonObj_p JsonObj_new_from_string_p(const String* json_string_p)
     curr_item_p->parent       = curr_item_p; // Set the parent to itself to recognize 'root'.
     curr_item_p->next_sibling = NULL;
     json_obj_p->root_p        = curr_item_p;
-    bool in_array             = false;
-    size_t array_index        = 0;
 
     LOG_DEBUG("JSON deserialization started.");
     deserialize(curr_item_p, &curr_pos_p);
@@ -378,6 +375,7 @@ void JsonObj_destroy(JsonObj* json_obj_p)
     {                                                                                              \
         if (item == NULL)                                                                          \
         {                                                                                          \
+            *out_value = NULL;                                                                     \
             return Err(NULL, "Input item is NULL", ERR_JSON_MISSING_ENTRY);                        \
         }                                                                                          \
         if (!strcmp(item->key_p, key))                                                             \
@@ -422,14 +420,14 @@ void JsonObj_destroy(JsonObj* json_obj_p)
                 ACTION;                                                                            \
                 return Ok(NULL);                                                                   \
             }                                                                                      \
-            else if ((item->value->value_type == VALUE_SIZE_T) && (value_token == VALUE_FLOAT))    \
+            else if ((item->value->value_type == VALUE_UINT) && (value_token == VALUE_FLOAT))      \
             {                                                                                      \
                 LOG_WARN("Converting size_t to float");                                            \
-                *out_value = (float)(1.0f * item->value->value_size_t);                            \
+                *out_value = (float)(1.0f * item->value->value_uint);                              \
                 ACTION;                                                                            \
                 return Ok(NULL);                                                                   \
             }                                                                                      \
-            else if ((item->value->value_type == VALUE_INT) && (value_token == VALUE_SIZE_T))      \
+            else if ((item->value->value_type == VALUE_INT) && (value_token == VALUE_UINT))        \
             {                                                                                      \
                 LOG_WARN("Converting int to size_t");                                              \
                 if (item->value->value_int < 0)                                                    \
@@ -442,15 +440,15 @@ void JsonObj_destroy(JsonObj* json_obj_p)
                 ACTION;                                                                            \
                 return Ok(NULL);                                                                   \
             }                                                                                      \
-            else if ((item->value->value_type == VALUE_SIZE_T) && (value_token == VALUE_INT))      \
+            else if ((item->value->value_type == VALUE_UINT) && (value_token == VALUE_INT))        \
             {                                                                                      \
                 LOG_WARN("Converting size_t to int");                                              \
-                *out_value = (int)item->value->value_size_t;                                       \
+                *out_value = (int)item->value->value_uint;                                         \
                 /* check for overflow */                                                           \
-                if ((size_t)*out_value != item->value->value_size_t)                               \
+                if ((size_t)*out_value != item->value->value_uint)                                 \
                 {                                                                                  \
                     LOG_ERROR("Overflow while converting %lu into an int",                         \
-                              item->value->value_size_t);                                          \
+                              item->value->value_uint);                                            \
                     return Err(NULL, "Failed to convert from SIZE_T to INT", ERR_INVALID_INPUT);   \
                 };                                                                                 \
                 ACTION;                                                                            \
@@ -485,7 +483,7 @@ void JsonObj_destroy(JsonObj* json_obj_p)
             }                                                                                      \
             else if (json_item->next_sibling == NULL)                                              \
             {                                                                                      \
-                LOG_WARN("Index out %lu of boundaries.", index);                                   \
+                LOG_WARN("Index %lu out of boundaries.", index);                                   \
                 return Err(NULL, "Input item is NULL", ERR_NULL);                                  \
             }                                                                                      \
             json_item = json_item->next_sibling;                                                   \
@@ -506,14 +504,15 @@ GET_VALUE_c(value_array_p, VALUE_ARRAY, JsonArray**,
             (*out_value)->element = item->value->value_child_p);
 
 GET_NUMBER_c(value_int, VALUE_INT, int*, );
-GET_NUMBER_c(value_size_t, VALUE_SIZE_T, size_t*, );
+GET_NUMBER_c(value_uint, VALUE_UINT, size_t*, );
 GET_NUMBER_c(value_float, VALUE_FLOAT, float*, );
 
 GET_ARRAY_VALUE_c(value_char_p, VALUE_STR, const char**);
 GET_ARRAY_VALUE_c(value_int, VALUE_INT, int*);
-GET_ARRAY_VALUE_c(value_size_t, VALUE_SIZE_T, size_t*);
+GET_ARRAY_VALUE_c(value_uint, VALUE_UINT, size_t*);
 GET_ARRAY_VALUE_c(value_float, VALUE_FLOAT, float*);
 GET_ARRAY_VALUE_c(value_child_p, VALUE_ITEM, JsonItem**);
+
 #if TEST == 1
 
 String* load_file(char* filename)
@@ -561,7 +560,7 @@ void test_class_json()
     JsonItem* json_item;     // Hold objects of type JsonItem.
     const char* value_str;   // Hold objects of type string.
     int value_int;           // Hold objects of type int.
-    size_t value_size_t;     // Hold objects of type size_t.
+    size_t value_uint;       // Hold objects of type size_t.
     float value_float;       // Hold objects of type float.
     JsonArray* json_array;   // Hold objects of type JsonArray.
     JsonArray* json_array_2; // Hold objects of type JsonArray.
@@ -574,15 +573,17 @@ void test_class_json()
     json_obj_p  = unwrap(JsonObj_new(json_char_p));
     Json_get(json_obj_p->root_p, "key", &value_str);
     ASSERT_EQ("value string", value_str, "Key for root found with correct value STRING");
+    Json_get(json_obj_p->root_p, "missing key", &value_str);
+    ASSERT_EQ(value_str == NULL, true, "Returned null due to missing key.");
     JsonObj_destroy(json_obj_p);
 
     PRINT_TEST_TITLE("Sibling key-value pair");
     json_char_p = " {\"key\": \"value string\", \"sibling\": 56}";
     json_obj_p  = unwrap(JsonObj_new(json_char_p));
     Json_get(json_obj_p->root_p, "key", &value_str);
-    Json_get(json_obj_p->root_p, "sibling", &value_size_t);
+    Json_get(json_obj_p->root_p, "sibling", &value_uint);
     ASSERT_EQ("value string", value_str, "Key for root value STRING");
-    ASSERT_EQ(56, value_size_t, "Key for root found with correct value INT");
+    ASSERT_EQ(56, value_uint, "Key for root found with correct value INT");
     JsonObj_destroy(json_obj_p);
 
     PRINT_TEST_TITLE("Simple array");
@@ -592,8 +593,8 @@ void test_class_json()
     Json_get(json_obj_p->root_p, "key", &json_array);
     Json_get(json_array, 0, &value_str);
     ASSERT_EQ("array value", value_str, "Array STRING element retrieved.");
-    Json_get(json_array, 1, &value_size_t);
-    ASSERT_EQ(56, value_size_t, "Array SIZE_T element retrieved.");
+    Json_get(json_array, 1, &value_uint);
+    ASSERT_EQ(56, value_uint, "Array SIZE_T element retrieved.");
     JsonObj_destroy(json_obj_p);
 
     PRINT_TEST_TITLE("Array of objects");
@@ -604,8 +605,8 @@ void test_class_json()
     Json_get(json_array, 0, &json_item);
     ASSERT_EQ(json_item->key_p, "array key", "Array STRING element retrieved.");
     printf("%d\n", json_item->value->value_type);
-    Json_get(json_item, "array key", &value_size_t);
-    ASSERT_EQ(value_size_t, 56, "Value found an item that is also array element.");
+    Json_get(json_item, "array key", &value_uint);
+    ASSERT_EQ(value_uint, 56, "Value found an item that is also array element.");
     JsonObj_destroy(json_obj_p);
 
     PRINT_TEST_TITLE("test_json_array_1.json");
@@ -615,8 +616,8 @@ void test_class_json()
     ASSERT_EQ(json_array != NULL, true, "Array found as root element.");
     Json_get(json_array, 0, &json_item);
     ASSERT_EQ(json_item != NULL, true, "First array element is an item.");
-    Json_get(json_item, "object 1", &value_size_t);
-    ASSERT_EQ(value_size_t, 56, "Value SIZE_T found");
+    Json_get(json_item, "object 1", &value_uint);
+    ASSERT_EQ(value_uint, 56, "Value SIZE_T found");
     Json_get(json_array, 1, &json_item);
     ASSERT_EQ(json_item != NULL, true, "Second array element is an item.");
     Json_get(json_item, "object 2", &value_float);
@@ -624,8 +625,8 @@ void test_class_json()
     Json_get(json_array, 2, &json_item);
     Json_get(json_item, "object 3", &value_str);
     ASSERT_EQ(value_str, "SOME STRING", "Array element STRING found.");
-    Json_get(json_array, 3, &value_size_t);
-    ASSERT_EQ(value_size_t, 32, "Array element INT found.");
+    Json_get(json_array, 3, &value_uint);
+    ASSERT_EQ(value_uint, 32, "Array element INT found.");
     JsonObj_destroy(json_obj_p);
     String_destroy(json_string_p);
 
@@ -637,8 +638,8 @@ void test_class_json()
     Json_get(json_array, 0, &json_item);
     ASSERT_EQ(json_item != NULL, true, "First array element is an item.");
     Json_get(json_item, "inner array 1", &json_array_2);
-    Json_get(json_array_2, 0, &value_size_t);
-    ASSERT_EQ(value_size_t, 12314, "Value SIZE_T found");
+    Json_get(json_array_2, 0, &value_uint);
+    ASSERT_EQ(value_uint, 12314, "Value SIZE_T found");
     Json_get(json_array_2, 1, &value_float);
     ASSERT_EQ(value_float, -32.4f, "Value FLOAT found");
     Json_get(json_array, 1, &json_item);
@@ -685,16 +686,16 @@ void test_class_json()
     ASSERT_EQ(value_str, "value_2.2.1", "Found nested sibling object value");
 
     PRINT_TEST_TITLE("Test integer");
-    Json_get(json_obj_p->root_p, "test_integer", &value_size_t);
-    ASSERT_EQ(value_size_t, 435234, "Integer found and read correctly");
+    Json_get(json_obj_p->root_p, "test_integer", &value_uint);
+    ASSERT_EQ(value_uint, 435234, "Integer found and read correctly");
 
     PRINT_TEST_TITLE("Test float");
     Json_get(json_obj_p->root_p, "test_float", &value_float);
     ASSERT_EQ(value_float, 435.234f, "Float found and read correctly");
 
     Json_get(json_obj_p->root_p, "test_array", &json_array);
-    Json_get(json_array, 0, &value_size_t);
-    ASSERT_EQ(value_size_t, 14352, "Array element of type INT read correctly");
+    Json_get(json_array, 0, &value_uint);
+    ASSERT_EQ(value_uint, 14352, "Array element of type INT read correctly");
     Json_get(json_array, 1, &value_float);
     ASSERT_EQ(value_float, 2.15f, "Array element of type FLOAT read correctly");
     Json_get(json_array, 2, &value_str);
@@ -727,13 +728,13 @@ void test_class_json()
     PRINT_TEST_TITLE("Data conversion");
     json_string_p = load_file("test/assets/test_json_numbers.json");
     json_obj_p    = unwrap(JsonObj_new(json_string_p));
-    Json_get(json_obj_p->root_p, "value_int", &value_size_t);
-    ASSERT_EQ((size_t)23, value_size_t, "Conversion from INT to SIZE_T successfull");
-    Json_get(json_obj_p->root_p, "value_small_size_t", &value_int);
+    Json_get(json_obj_p->root_p, "value_int", &value_uint);
+    ASSERT_EQ((size_t)23, value_uint, "Conversion from INT to SIZE_T successfull");
+    Json_get(json_obj_p->root_p, "value_small_uint", &value_int);
     ASSERT_EQ((int)43, value_int, "Conversion from SIZE_T to INT successfull");
-    res_void_p = Json_get(json_obj_p->root_p, "value_negative_int", &value_size_t);
+    res_void_p = Json_get(json_obj_p->root_p, "value_negative_int", &value_uint);
     ASSERT_EQ(res_void_p.is_err, true, "Conversion from negative INT to SIZE_T failed");
-    res_void_p = Json_get(json_obj_p->root_p, "value_size_t", &value_int);
+    res_void_p = Json_get(json_obj_p->root_p, "value_uint", &value_int);
     ASSERT_EQ(res_void_p.is_err, true, "Conversion from large SIZE_T to INT failed");
     JsonObj_destroy(json_obj_p);
     String_destroy(json_string_p);

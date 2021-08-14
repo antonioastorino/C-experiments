@@ -47,7 +47,7 @@
     }
 
 RESULT_TYPE_c(int, int);
-RESULT_TYPE_c(size_t, size_t);
+RESULT_TYPE_c(uint, size_t);
 RESULT_TYPE_c(bool, bool);
 RESULT_TYPE_c(float, float);
 RESULT_TYPE_c(char_p, const char*);

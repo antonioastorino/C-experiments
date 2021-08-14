@@ -40,12 +40,12 @@ Result_int str_to_int(const char* str)
     return Ok(ret_int * sign);
 }
 
-Result_size_t str_to_size_t(const char* str)
+Result_uint str_to_uint(const char* str)
 {
-    size_t ret_size_t = 0;
+    size_t ret_uint = 0;
     if (str == NULL)
     {
-        return Err(ret_size_t, "Null pointer found", ERR_NULL);
+        return Err(ret_uint, "Null pointer found", ERR_NULL);
     }
     if (str[0] == '+')
     {
@@ -53,7 +53,7 @@ Result_size_t str_to_size_t(const char* str)
     }
     if (str[0] == '\0')
     {
-        return Err(ret_size_t, "Cannot convert the provided string into a size_t",
+        return Err(ret_uint, "Cannot convert the provided string into a size_t",
                    ERR_PARSE_STRING_TO_LONG_INT);
     }
     while (*str != '\0')
@@ -62,12 +62,12 @@ Result_size_t str_to_size_t(const char* str)
         {
             char error_message[256];
             sprintf(error_message, "Cannot convert string containing `%c`", *str);
-            return Err(ret_size_t, error_message, ERR_PARSE_STRING_TO_LONG_INT);
+            return Err(ret_uint, error_message, ERR_PARSE_STRING_TO_LONG_INT);
         }
-        ret_size_t = ret_size_t * 10 + (*str - '0');
+        ret_uint = ret_uint * 10 + (*str - '0');
         str++;
     }
-    return Ok(ret_size_t);
+    return Ok(ret_uint);
 }
 
 Result_float str_to_float(const char* str)
@@ -180,22 +180,20 @@ void test_converter()
     ASSERT_EQ((int)str_to_int("").err.code, ERR_PARSE_STRING_TO_INT, "Empty string detected");
 
     PRINT_TEST_TITLE("Valid to-size_t conversions");
-    ASSERT_EQ(unwrap(str_to_size_t("1234567890123")), 1234567890123,
-              "size_t successfully converted");
-    ASSERT_EQ(unwrap(str_to_size_t("0")), 0, "Zero successfully converted");
-    ASSERT_EQ(unwrap(str_to_size_t("+1")), +1, "size_t with sign successfully converted");
-    ASSERT_EQ(unwrap(str_to_size_t("0002")), 2, "size_t with leading zeros converted");
+    ASSERT_EQ(unwrap(str_to_uint("1234567890123")), 1234567890123, "size_t successfully converted");
+    ASSERT_EQ(unwrap(str_to_uint("0")), 0, "Zero successfully converted");
+    ASSERT_EQ(unwrap(str_to_uint("+1")), +1, "size_t with sign successfully converted");
+    ASSERT_EQ(unwrap(str_to_uint("0002")), 2, "size_t with leading zeros converted");
 
     PRINT_TEST_TITLE("Invalid to-int conversions");
-    ASSERT_EQ((int)str_to_size_t("1f5").err.code, ERR_PARSE_STRING_TO_LONG_INT,
+    ASSERT_EQ((int)str_to_uint("1f5").err.code, ERR_PARSE_STRING_TO_LONG_INT,
               "Invalid string detected");
-    ASSERT_EQ((int)str_to_size_t("-235").err.code, ERR_PARSE_STRING_TO_LONG_INT,
+    ASSERT_EQ((int)str_to_uint("-235").err.code, ERR_PARSE_STRING_TO_LONG_INT,
               "Invalid string detected");
-    ASSERT_EQ((int)str_to_size_t("+-05").err.code, ERR_PARSE_STRING_TO_LONG_INT,
+    ASSERT_EQ((int)str_to_uint("+-05").err.code, ERR_PARSE_STRING_TO_LONG_INT,
               "Invalid string detected");
-    ASSERT_EQ((int)str_to_size_t(NULL).err.code, ERR_NULL, "Null string detected");
-    ASSERT_EQ((int)str_to_size_t("").err.code, ERR_PARSE_STRING_TO_LONG_INT,
-              "Empty string detected");
+    ASSERT_EQ((int)str_to_uint(NULL).err.code, ERR_NULL, "Null string detected");
+    ASSERT_EQ((int)str_to_uint("").err.code, ERR_PARSE_STRING_TO_LONG_INT, "Empty string detected");
 
     PRINT_TEST_TITLE("Valid to-float conversions");
     printf("%f\n", unwrap(str_to_float("12.345")));
