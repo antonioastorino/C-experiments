@@ -4,8 +4,16 @@ BD="$(pwd)/$(dirname $0)/.."
 source "${BD}/bin/variables.sh"
 if [ -z $APP_NAME ]; then exit 1; fi
 
+OPT_LEVEL=0
+while getopts o: flag
+do
+    case "${flag}" in
+        o) OPT_LEVEL=${OPTARG};;
+    esac
+done
+
 # Accept case-insensitive "test" by converting to uppercase
-MODE="$1"
+MODE=${@:$OPTIND:1}
 MODE=${MODE:u}
 
 function analyze_logs() {
@@ -75,10 +83,10 @@ if [ "${MODE}" = "TEST" ] || [ "${MODE}" = "DEBUG" ]; then
     touch "${ARTIFACT_FOLDER}/non-empty/inner/file.txt"
     touch "${ARTIFACT_FOLDER}/non-empty/inner/inner_l2/file.txt"
     touch "${ARTIFACT_FOLDER}/delete_me.txt"
-    make MODE=TEST
+    make MODE=TEST OPT=${OPT_LEVEL}
     if [ "${MODE}" = "TEST" ]; then
         # Remove previous logs.
-        ./build/"${APP_NAME}-test" 2>"${LOG_FILE_ERR}"
+        ./build/"${APP_NAME}-test-o${OPT_LEVEL}" 2>"${LOG_FILE_ERR}"
         RET_VAL=$?
         echo ""
         echo "================================================================================"
@@ -86,10 +94,10 @@ if [ "${MODE}" = "TEST" ] || [ "${MODE}" = "DEBUG" ]; then
         echo "================================================================================"
         analyze_mem
     else
-        lldb ./build/"${APP_NAME}-test"
+        lldb ./build/"${APP_NAME}-test-o${OPT_LEVEL}"
     fi
 else
-    make
-    ./build/"${APP_NAME}"
+    make OPT=${OPT_LEVEL}
+    ./build/"${APP_NAME}-o${OPT_LEVEL}"
 fi
 popd

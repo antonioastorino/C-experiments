@@ -91,7 +91,7 @@ pf "\n\tsed -i.bak 's/^#define TEST 0/#define TEST 1/g' \"\$(BD)\"/${COMMON_HEAD
 # Set MEM_ANALYSIS to 1 in case MODE==TEST
 pf "\n\t[ \`grep -c '^#define MEM_ANALYSIS 0' \"\$(BD)\"/${COMMON_HEADER}\` -eq 1 ] && \\"
 pf "\n\tsed -i.bak 's/^#define MEM_ANALYSIS 0/#define MEM_ANALYSIS 1/g' \"\$(BD)\"/${COMMON_HEADER}; \\"
-pf "\n\tmake -C \"\$(BD)\" ${BUILD_DIR}/${APP_NAME}-test; \\"
+pf "\n\tmake -C \"\$(BD)\" OPT=\$(OPT) ${BUILD_DIR}/${APP_NAME}-test-o\$(OPT); \\"
 pf "\n\telse \\"
 
 # Reset TEST and MEM_ANALYSIS in case as default behavior.
@@ -99,25 +99,25 @@ pf "\n\t[ \`grep -c '^#define TEST 1' \"\$(BD)\"/${COMMON_HEADER}\` -eq 1 ] && \
 pf "\n\tsed -i.bak 's/^#define TEST 1/#define TEST 0/g' \"\$(BD)\"/${COMMON_HEADER}; \\"
 pf "\n\t[ \`grep -c '^#define MEM_ANALYSIS 1' \"\$(BD)\"/${COMMON_HEADER}\` -eq 1 ] && \\"
 pf "\n\tsed -i.bak 's/^#define MEM_ANALYSIS 1/#define MEM_ANALYSIS 0/g' \"\$(BD)\"/${COMMON_HEADER}; \\"
-pf "\n\tmake -C \"\$(BD)\" ${BUILD_DIR}/${APP_NAME}; \\"
+pf "\n\tmake -C \"\$(BD)\" OPT=\$(OPT) ${BUILD_DIR}/${APP_NAME}-o\$(OPT); \\"
 pf "\n\tfi"
 pf "\n"
 
-pf "\n${BUILD_DIR}/${APP_NAME}:"
+pf "\n${BUILD_DIR}/${APP_NAME}-o\$(OPT):"
 while read -r FILE_NAME; do
 	if [ "${FILE_NAME}" == "${MAIN_TEST}" ]; then continue; fi
 	pf "\\"
-	pf "\n\t${BUILD_DIR}/$FILE_NAME.o "
+	pf "\n\t${BUILD_DIR}/$FILE_NAME-o\$(OPT).o "
 done <src-name.list
 pf "\n\t${GLOBAL_COMPILER} \$(LIB) \$(OBJCFLAGS) -O\$(OPT) \$(INC) \$(FRAMEWORKS) \$^ -o \$@"
 pf "\n"
 
 # Test
-pf "\n${BUILD_DIR}/${APP_NAME}-test:"
+pf "\n${BUILD_DIR}/${APP_NAME}-test-o\$(OPT):"
 while read -r FILE_NAME; do
 	if [ "${FILE_NAME}" == "${MAIN}" ]; then continue; fi
 	pf "\\"
-	pf "\n\t${BUILD_DIR}/$FILE_NAME.o "
+	pf "\n\t${BUILD_DIR}/$FILE_NAME-o\$(OPT).o "
 done <src-name.list
 pf "\n\t${GLOBAL_COMPILER} \$(LIB) \$(OBJCFLAGS) -O\$(OPT) \$(INC) \$(FRAMEWORKS) \$^ -o \$@"
 pf "\n"
@@ -129,7 +129,7 @@ while read -r FILE_FULL_PATH; do
 	FILE_NO_EXT=${FILE_NAME%.*}
 	FILE_EXT=${FILE_NAME##*.}
 
-	pf "\n${BUILD_DIR}/$FILE_NO_EXT.o: ${FILE_FULL_PATH} "
+	pf "\n${BUILD_DIR}/$FILE_NO_EXT-o\$(OPT).o: ${FILE_FULL_PATH} "
 
 	HEADER_FILES=$(egrep "^#include|^#import" "${FILE_FULL_PATH}" | grep -v "<" | awk -F '"' '{print $2}')
 
@@ -144,13 +144,13 @@ while read -r FILE_FULL_PATH; do
 
 	case $FILE_EXT in
 	c)
-		pf "\n\tgcc \$(INC) \$(CFLAGS) -c \$< -o \$@\n"
+		pf "\n\tgcc \$(INC) \$(CFLAGS) -O\$(OPT) -c \$< -o \$@\n"
 		;;
 	cpp)
-		pf "\n\tg++ \$(INC) \$(CPPFLAGS) -c \$< -o \$@\n"
+		pf "\n\tg++ \$(INC) \$(CPPFLAGS) -O\$(OPT) -c \$< -o \$@\n"
 		;;
 	mm)
-		pf "\n\tclang \$(INC) \$(OBJCFLAGS) -c \$< -o \$@\n"
+		pf "\n\tclang \$(INC) \$(OBJCFLAGS) -O\$(OPT) -c \$< -o \$@\n"
 		;;
 	esac
 	pf "\n"

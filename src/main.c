@@ -17,7 +17,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Parameters not supported");
     }
     printf("Hello from `main`\n");
-    printf("You are running this program from `%s`.\n", argv[0]);
+    printf("You are running `%s`.\n", argv[0]);
     printf("Log level: %d\n", LOG_LEVEL);
 
     return 0;
