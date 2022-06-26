@@ -1,11 +1,11 @@
-#!/bin/bash
-set -e
+#!/bin/zsh
+set -u
 BD="$(pwd)/$(dirname $0)/.."
 source "${BD}/bin/variables.sh"
 
 /bin/rm -rf \
-	"${EXECUTABLE}" \
-	"${BUILD_DIR}" \
-	"${MAKE_FILE}" \
-	"${LOG_FILE_ERR}" \
-	*.list
+    "${EXECUTABLE}" \
+    "${BUILD_DIR}" \
+    "${MAKE_FILE}" \
+    "${LOG_FILE_ERR}" \
+    *.list

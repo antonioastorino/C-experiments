@@ -1,14 +1,12 @@
 #!/bin/zsh
-set -e
+set -eu
 BD="$(pwd)/$(dirname $0)/.."
 source "${BD}/bin/variables.sh"
-if [ -z $APP_NAME ]; then exit 1; fi
 
 OPT_LEVEL=0
-while getopts o: flag
-do
+while getopts o: flag; do
     case "${flag}" in
-        o) OPT_LEVEL=${OPTARG};;
+    o) OPT_LEVEL=${OPTARG} ;;
     esac
 done
 
